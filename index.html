@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cotações B3 — Análise de Ações</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --green-bg: #0d2b16;
+      --green-text: #3fb950;
+      --red-bg: #2d0f0f;
+      --red-text: #f85149;
+      --accent: #58a6ff;
+      --radius: 10px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      min-height: 100vh;
+      padding: 24px 16px 64px;
+    }
+
+    /* ── Header ── */
+    header {
+      max-width: 1100px;
+      margin: 0 auto 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header-left h1 { font-size: 1.5rem; font-weight: 700; }
+    .header-left h1 span { color: var(--accent); }
+    .header-left p  { color: var(--muted); font-size: 0.85rem; margin-top: 3px; }
+
+    .header-right { display: flex; align-items: center; gap: 10px; }
+
+    #lbl-updated { color: var(--muted); font-size: 0.8rem; }
+
+    .btn-edit {
+      background: var(--accent);
+      color: #0d1117;
+      border: none;
+      border-radius: 6px;
+      padding: 7px 18px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+    .btn-edit:hover { opacity: .85; }
+    .btn-edit.saving {
+      background: var(--green-text);
+    }
+
+    /* ── Edit-mode banner ── */
+    #edit-banner {
+      max-width: 1100px;
+      margin: -16px auto 24px;
+      background: #1c2a1c;
+      border: 1px solid #2ea04355;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 0.82rem;
+      color: var(--green-text);
+      display: none;
+    }
+    body.editing #edit-banner { display: block; }
+
+    /* ── Section label ── */
+    .section-label {
+      max-width: 1100px;
+      margin: 0 auto 14px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--muted);
+    }
+
+    /* ── Cards ── */
+    .cards-grid {
+      max-width: 1100px;
+      margin: 0 auto 40px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 22px 18px;
+      transition: border-color .2s;
+    }
+    .card:hover { border-color: var(--accent); }
+    body.editing .card { border-color: #3fb95055; }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .card-ticker { font-size: 1.1rem; font-weight: 700; color: var(--accent); }
+    .card-name   { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+
+    .badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 20px;
+    }
+    .badge-up   { background: var(--green-bg); color: var(--green-text); }
+    .badge-down { background: var(--red-bg);   color: var(--red-text);   }
+    .badge-flat { background: #1c2128;          color: var(--muted);      }
+
+    /* ── Editable value ── */
+    .val-wrap { display: inline-flex; align-items: center; gap: 4px; }
+
+    .val {
+      cursor: default;
+      border-radius: 4px;
+      padding: 1px 3px;
+      transition: background .15s;
+    }
+    body.editing .val {
+      cursor: text;
+      outline: none;
+    }
+    body.editing .val:hover  { background: #21262d; }
+    body.editing .val:focus  { background: #21262d; outline: 2px solid var(--accent); outline-offset: 1px; }
+
+    .edit-hint {
+      font-size: 0.62rem;
+      color: var(--accent);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .15s;
+    }
+    body.editing .edit-hint { opacity: 1; }
+
+    /* ── Price row ── */
+    .price-row { margin-bottom: 4px; }
+    .price-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 2px; }
+    .price-val   { font-size: 2rem; font-weight: 700; line-height: 1.1; }
+
+    /* ── Change row ── */
+    .change-row { font-size: 0.88rem; font-weight: 600; margin-bottom: 16px; }
+    .up   { color: var(--green-text); }
+    .down { color: var(--red-text);   }
+    .flat { color: var(--muted);      }
+
+    .divider { border: none; border-top: 1px solid var(--border); margin-bottom: 14px; }
+
+    /* ── Stats grid ── */
+    .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; }
+    .stat-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+    .stat-value { font-size: 0.88rem; font-weight: 600; margin-top: 1px; }
+
+    /* ── Table ── */
+    .table-wrap { max-width: 1100px; margin: 0 auto 40px; overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      font-size: 0.86rem;
+    }
+
+    thead th {
+      background: #1c2128;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      padding: 11px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody tr { border-bottom: 1px solid var(--border); }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #1c2128; }
+    tbody td { padding: 12px 16px; }
+    tbody td:first-child { font-weight: 700; color: var(--accent); }
+
+    /* ── Footer ── */
+    footer {
+      max-width: 1100px;
+      margin: 48px auto 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.75rem;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>Cotações <span>B3</span></h1>
+    <p>Taesa · Santander · Energisa</p>
+  </div>
+  <div class="header-right">
+    <span id="lbl-updated"></span>
+    <button class="btn-edit" id="btn-edit">Editar</button>
+  </div>
+</header>
+
+<div id="edit-banner">
+  Modo de edição ativo — clique em qualquer valor para alterá-lo. Clique em <strong>Salvar</strong> para confirmar.
+</div>
+
+<p class="section-label">Resumo das cotações</p>
+<div class="cards-grid" id="cards-grid"></div>
+
+<p class="section-label">Comparativo detalhado</p>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Ação</th>
+        <th>Preço atual</th>
+        <th>Abertura</th>
+        <th>Máxima</th>
+        <th>Mínima</th>
+        <th>Fech. anterior</th>
+        <th>Variação (R$)</th>
+        <th>Variação (%)</th>
+        <th>Volume</th>
+      </tr>
+    </thead>
+    <tbody id="table-body"></tbody>
+  </table>
+</div>
+
+<footer>
+  Dados inseridos manualmente · Sem conexão com API externa<br>
+  <strong>Este site não constitui recomendação de investimento.</strong>
+</footer>
+
+<script>
+// ── Dados padrão ──────────────────────────────────────────────────────────────
+// Substitua pelos valores reais ao entrar em modo de edição.
+const DEFAULT = [
+  {
+    symbol: 'TAEE11',
+    name: 'Taesa',
+    color: '#58a6ff',
+    price: 12.45,
+    open: 12.30,
+    high: 12.60,
+    low: 12.20,
+    prevClose: 12.28,
+    volume: 1_820_000,
+  },
+  {
+    symbol: 'SANB11',
+    name: 'Santander Brasil',
+    color: '#f0883e',
+    price: 27.90,
+    open: 27.50,
+    high: 28.10,
+    low: 27.40,
+    prevClose: 27.65,
+    volume: 4_350_000,
+  },
+  {
+    symbol: 'ENGI11',
+    name: 'Energisa',
+    color: '#3fb950',
+    price: 44.80,
+    open: 44.20,
+    high: 45.10,
+    low: 44.00,
+    prevClose: 44.35,
+    volume: 2_110_000,
+  },
+];
+
+const STORE_KEY = 'b3_stocks_data';
+const DATE_KEY  = 'b3_stocks_date';
+
+// ── Persistência ──────────────────────────────────────────────────────────────
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (!raw) return DEFAULT.map(d => ({ ...d }));
+    return JSON.parse(raw);
+  } catch { return DEFAULT.map(d => ({ ...d })); }
+}
+
+function save(stocks) {
+  localStorage.setItem(STORE_KEY, JSON.stringify(stocks));
+  const now = new Date().toLocaleString('pt-BR', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+  localStorage.setItem(DATE_KEY, now);
+  document.getElementById('lbl-updated').textContent = `Atualizado em ${now}`;
+}
+
+// ── Formatters ────────────────────────────────────────────────────────────────
+const brl = v => v == null ? '—'
+  : v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+const pct = v => v == null ? '—'
+  : (v > 0 ? '+' : '') + v.toFixed(2) + '%';
+
+const vol = v => v == null ? '—' : Math.round(v).toLocaleString('pt-BR');
+
+// ── Derivados ─────────────────────────────────────────────────────────────────
+function change(s)    { return s.price - s.prevClose; }
+function changePct(s) { return s.prevClose ? (change(s) / s.prevClose) * 100 : 0; }
+
+function dirClass(s) {
+  const c = change(s);
+  return c > 0 ? 'up' : c < 0 ? 'down' : 'flat';
+}
+function badgeClass(s) {
+  const c = change(s);
+  return c > 0 ? 'badge-up' : c < 0 ? 'badge-down' : 'badge-flat';
+}
+function badgeLabel(s) {
+  const c = change(s);
+  return (c > 0 ? '▲' : c < 0 ? '▼' : '—') + ' B3';
+}
+
+// ── Editable span ─────────────────────────────────────────────────────────────
+// Returns an element that shows a value and is contenteditable in edit mode.
+function makeVal(text, cls = '') {
+  const span = document.createElement('span');
+  span.className = 'val' + (cls ? ' ' + cls : '');
+  span.textContent = text;
+  span.setAttribute('contenteditable', 'false');
+  return span;
+}
+
+// ── Render cards ──────────────────────────────────────────────────────────────
+function renderCards(stocks) {
+  const grid = document.getElementById('cards-grid');
+  grid.innerHTML = '';
+
+  stocks.forEach((s, idx) => {
+    const chg    = change(s);
+    const chgPct = changePct(s);
+    const dir    = dirClass(s);
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.idx = idx;
+
+    // header
+    const header = document.createElement('div');
+    header.className = 'card-header';
+    header.innerHTML = `
+      <div>
+        <div class="card-ticker">${s.symbol}</div>
+        <div class="card-name">${s.name}</div>
+      </div>
+      <span class="badge ${badgeClass(s)}">${badgeLabel(s)}</span>`;
+    card.appendChild(header);
+
+    // price
+    const priceRow = document.createElement('div');
+    priceRow.className = 'price-row';
+    const pLabel = document.createElement('div');
+    pLabel.className = 'price-label';
+    pLabel.textContent = 'Preço atual';
+    const pVal = makeVal(brl(s.price), 'price-val');
+    pVal.dataset.field = 'price';
+    pVal.dataset.raw   = s.price;
+    priceRow.appendChild(pLabel);
+    priceRow.appendChild(pVal);
+    card.appendChild(priceRow);
+
+    // change
+    const changeRow = document.createElement('div');
+    changeRow.className = 'change-row ' + dir;
+    changeRow.textContent =
+      (chg >= 0 ? '+' : '') + brl(chg) + '  (' + pct(chgPct) + ')';
+    card.appendChild(changeRow);
+
+    // divider
+    const hr = document.createElement('hr');
+    hr.className = 'divider';
+    card.appendChild(hr);
+
+    // stats
+    const statsDiv = document.createElement('div');
+    statsDiv.className = 'stats';
+
+    const fields = [
+      { label: 'Abertura',       field: 'open',      fmt: brl },
+      { label: 'Fech. anterior', field: 'prevClose',  fmt: brl },
+      { label: 'Máxima',         field: 'high',       fmt: brl },
+      { label: 'Mínima',         field: 'low',        fmt: brl },
+    ];
+
+    fields.forEach(({ label, field, fmt }) => {
+      const item = document.createElement('div');
+      item.innerHTML = `<div class="stat-label">${label}</div>`;
+      const vSpan = makeVal(fmt(s[field]), 'stat-value');
+      vSpan.dataset.field = field;
+      vSpan.dataset.raw   = s[field];
+      item.appendChild(vSpan);
+      statsDiv.appendChild(item);
+    });
+
+    card.appendChild(statsDiv);
+    grid.appendChild(card);
+  });
+}
+
+// ── Render table ──────────────────────────────────────────────────────────────
+function renderTable(stocks) {
+  const tbody = document.getElementById('table-body');
+  tbody.innerHTML = '';
+
+  stocks.forEach(s => {
+    const chg    = change(s);
+    const chgPct = changePct(s);
+    const dir    = dirClass(s);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${s.symbol}<br><small style="color:var(--muted);font-weight:400">${s.name}</small></td>
+      <td>${brl(s.price)}</td>
+      <td>${brl(s.open)}</td>
+      <td>${brl(s.high)}</td>
+      <td>${brl(s.low)}</td>
+      <td>${brl(s.prevClose)}</td>
+      <td class="${dir}">${chg >= 0 ? '+' : ''}${brl(chg)}</td>
+      <td class="${dir}">${pct(chgPct)}</td>
+      <td>${vol(s.volume)}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ── Edit mode ─────────────────────────────────────────────────────────────────
+let editing = false;
+let stocks  = load();
+
+const btn = document.getElementById('btn-edit');
+
+btn.addEventListener('click', () => {
+  if (!editing) {
+    // Enter edit mode
+    editing = true;
+    document.body.classList.add('editing');
+    btn.textContent = 'Salvar';
+    btn.classList.add('saving');
+
+    // Make all .val spans editable
+    document.querySelectorAll('.val').forEach(el => {
+      el.setAttribute('contenteditable', 'true');
+    });
+
+  } else {
+    // Save and exit edit mode
+    editing = false;
+    document.body.classList.remove('editing');
+    btn.textContent = 'Editar';
+    btn.classList.remove('saving');
+
+    // Collect edited values
+    document.querySelectorAll('.card').forEach(card => {
+      const idx = parseInt(card.dataset.idx, 10);
+      card.querySelectorAll('.val[data-field]').forEach(el => {
+        const field = el.dataset.field;
+        const raw   = el.textContent.trim()
+          .replace(/[R$\s.]/g, '')   // remove R$, spaces, dots
+          .replace(',', '.');         // comma → dot for parseFloat
+        const num = parseFloat(raw);
+        if (!isNaN(num)) stocks[idx][field] = num;
+      });
+    });
+
+    save(stocks);
+    render();
+  }
+});
+
+// ── Init & render ─────────────────────────────────────────────────────────────
+function render() {
+  renderCards(stocks);
+  renderTable(stocks);
+}
+
+// Restore saved date label
+const savedDate = localStorage.getItem(DATE_KEY);
+if (savedDate) {
+  document.getElementById('lbl-updated').textContent = `Atualizado em ${savedDate}`;
+} else {
+  document.getElementById('lbl-updated').textContent = 'Dados de exemplo — clique em Editar';
+}
+
+render();
+</script>
+</body>
+</html>
