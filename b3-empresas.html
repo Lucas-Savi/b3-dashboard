@@ -563,21 +563,22 @@ async function loadGrahamData() {
 async function fetchBatch(tickers, attempt) {
   attempt = attempt || 1;
   try {
-    const u = url(
-      '/quote/' + tickers.join(','),
-      'modules=defaultKeyStatistics%2CsummaryProfile%2CfinancialData'
-    );
+    // fundamental=true: reliable, lighter rate limit, returns earningsPerShare + priceEarnings
+    // modules are only fetched per-stock when the user opens a modal
+    const u = url('/quote/' + tickers.join(','), 'fundamental=true');
     const res = await fetch(u);
     if (res.status === 429) {
-      if (attempt < 3) { await sleep(3500 * attempt); return fetchBatch(tickers, attempt + 1); }
+      if (attempt < 3) { await sleep(4000 * attempt); return fetchBatch(tickers, attempt + 1); }
       return;
     }
     if (!res.ok) return;
     const json = await res.json();
     for (const item of (json.results || [])) {
-      if (item.symbol) {
-        gData[item.symbol] = item;
-        cSet('fund_' + item.symbol, item);
+      const sym = item.symbol;
+      if (sym) {
+        // Merge into existing entry (may already have modules data from a modal open)
+        gData[sym] = Object.assign({}, gData[sym] || {}, item);
+        cSet('fund_' + sym, gData[sym]);
       }
     }
   } catch {}
