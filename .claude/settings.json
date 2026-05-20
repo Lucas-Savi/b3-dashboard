@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"c:\\Users\\lucas\\OneDrive\\Área de Trabalho\\Projeto Claude Code\\sync-github.ps1\""
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"Add-Content -Path 'C:\\Users\\lucas\\.claude\\hook-log.txt' -Value ((Get-Date).ToString() + ' hook fired'); & 'C:\\Users\\lucas\\.claude\\sync-b3-dashboard.ps1'\""
           }
         ]
       }

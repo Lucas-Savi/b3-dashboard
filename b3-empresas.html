@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>B3 — Empresas Listadas</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:      #0d0d1a;
+      --card:    #131326;
+      --card2:   #1a1a30;
+      --border:  #252540;
+      --accent:  #4f8ef7;
+      --green:   #00d084;
+      --red:     #ff4d6d;
+      --text:    #e0e0f0;
+      --muted:   #6a6a90;
+      --header:  #0f0f22;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--header);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    }
+    .logo { font-size: 18px; font-weight: 700; color: var(--accent); white-space: nowrap; letter-spacing: -0.3px; }
+    .logo span { color: var(--text); }
+    .search-wrap { flex: 1; min-width: 180px; max-width: 460px; position: relative; }
+    .search-wrap input {
+      width: 100%; padding: 9px 14px 9px 38px;
+      background: var(--card2); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-size: 14px; outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-wrap input:focus { border-color: var(--accent); }
+    .search-wrap input::placeholder { color: var(--muted); }
+    .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 15px; pointer-events: none; }
+    .header-count { color: var(--muted); font-size: 13px; white-space: nowrap; margin-left: auto; }
+    .back-link { color: var(--muted); font-size: 13px; text-decoration: none; padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; transition: all 0.15s; }
+    .back-link:hover { color: var(--text); border-color: var(--muted); }
+
+    /* ── Filter bar ── */
+    .filter-bar {
+      background: var(--header); border-bottom: 1px solid var(--border);
+      padding: 10px 24px; display: flex; gap: 6px; flex-wrap: nowrap;
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .filter-bar::-webkit-scrollbar { display: none; }
+    .filter-sep { width: 1px; background: var(--border); margin: 2px 4px; flex-shrink: 0; }
+    .chip {
+      padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 500;
+      cursor: pointer; border: 1px solid var(--border); background: transparent;
+      color: var(--muted); white-space: nowrap; transition: all 0.15s; flex-shrink: 0;
+    }
+    .chip:hover { color: var(--text); border-color: var(--muted); }
+    .chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .chip.type-chip.active { background: #7c5cbf; border-color: #7c5cbf; }
+
+    /* ── Grid ── */
+    .grid-wrap { padding: 20px 24px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 12px;
+    }
+
+    /* ── Stock Card ── */
+    .stock-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 16px; cursor: pointer; transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+      display: flex; flex-direction: column; gap: 0;
+    }
+    .stock-card:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 4px 20px rgba(79,142,247,0.12); }
+    .card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .logo-img {
+      width: 34px; height: 34px; border-radius: 7px; object-fit: contain;
+      background: #fff; padding: 3px; flex-shrink: 0;
+    }
+    .logo-fb {
+      width: 34px; height: 34px; border-radius: 7px; flex-shrink: 0;
+      background: var(--accent); display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; color: #fff;
+    }
+    .card-info .ticker { font-size: 14px; font-weight: 700; line-height: 1; }
+    .card-info .cname {
+      font-size: 11px; color: var(--muted); margin-top: 3px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px;
+    }
+    .card-price { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
+    .badge {
+      display: inline-block; padding: 2px 9px; border-radius: 12px;
+      font-size: 11px; font-weight: 600; margin-top: 5px;
+    }
+    .up   { background: rgba(0,208,132,0.12); color: var(--green); }
+    .down { background: rgba(255,77,109,0.12); color: var(--red); }
+    .flat { background: rgba(106,106,144,0.15); color: var(--muted); }
+    .card-sector { font-size: 11px; color: var(--muted); margin-top: 9px; }
+    .card-mcap   { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* ── Loading / Empty ── */
+    .state-box { text-align: center; padding: 70px 20px; color: var(--muted); }
+    .spinner {
+      width: 38px; height: 38px; margin: 0 auto 14px;
+      border: 3px solid var(--border); border-top-color: var(--accent);
+      border-radius: 50%; animation: spin 0.75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .btn { padding: 9px 22px; background: var(--accent); border: none; border-radius: 8px; color: #fff; cursor: pointer; font-size: 14px; font-weight: 500; transition: opacity 0.15s; }
+    .btn:hover { opacity: 0.85; }
+    .load-more-wrap { text-align: center; padding: 24px 0 32px; }
+
+    /* ── Modal ── */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 200;
+      display: flex; align-items: center; justify-content: center; padding: 16px;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+      width: 100%; max-width: 660px; max-height: 92vh; overflow-y: auto;
+      transform: translateY(18px); transition: transform 0.22s;
+      scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+    }
+    .overlay.open .modal { transform: translateY(0); }
+
+    .modal-head {
+      display: flex; align-items: center; gap: 14px;
+      padding: 18px 22px; border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; background: var(--card); z-index: 1;
+    }
+    .modal-logo { width: 46px; height: 46px; border-radius: 10px; object-fit: contain; background: #fff; padding: 4px; flex-shrink: 0; }
+    .modal-logo-fb {
+      width: 46px; height: 46px; border-radius: 10px; flex-shrink: 0;
+      background: var(--accent); display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: #fff;
+    }
+    .modal-title .ticker { font-size: 20px; font-weight: 700; line-height: 1.1; }
+    .modal-title .cname  { font-size: 13px; color: var(--muted); margin-top: 3px; }
+    .modal-price { margin-left: auto; text-align: right; }
+    .modal-price .price { font-size: 22px; font-weight: 700; }
+    .modal-price .badge { font-size: 12px; }
+    .modal-close {
+      margin-left: 10px; background: none; border: 1px solid var(--border);
+      color: var(--muted); cursor: pointer; font-size: 16px; padding: 5px 10px;
+      border-radius: 7px; transition: all 0.15s; flex-shrink: 0;
+    }
+    .modal-close:hover { color: var(--text); border-color: var(--muted); background: var(--card2); }
+    .modal-body { padding: 20px 22px 28px; }
+
+    /* Range tabs */
+    .range-row { display: flex; gap: 5px; margin-bottom: 10px; }
+    .range-btn {
+      padding: 4px 13px; border-radius: 6px; font-size: 12px; font-weight: 500;
+      cursor: pointer; border: 1px solid var(--border); background: none; color: var(--muted);
+      transition: all 0.15s;
+    }
+    .range-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .range-btn:hover:not(.active) { border-color: var(--muted); color: var(--text); }
+
+    /* Chart */
+    .chart-box { background: var(--card2); border-radius: 10px; padding: 10px 10px 6px; margin-bottom: 18px; }
+    svg.sparkline { width: 100%; height: 120px; display: block; }
+
+    /* Metrics */
+    .section-title { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px; }
+    .metrics {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-bottom: 18px;
+    }
+    .metric { background: var(--card2); border-radius: 9px; padding: 13px 14px; }
+    .metric .lbl { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .metric .val { font-size: 15px; font-weight: 600; margin-top: 5px; }
+
+    /* Extra info */
+    .extra-box { background: var(--card2); border-radius: 10px; padding: 14px 16px; }
+    .extra-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .extra-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .extra-row .k { color: var(--muted); }
+
+    /* API key banner */
+    .api-note {
+      background: rgba(79,142,247,0.08); border: 1px solid rgba(79,142,247,0.25);
+      border-radius: 10px; padding: 12px 16px; font-size: 12px; color: #8db4ff;
+      margin-bottom: 18px; line-height: 1.6;
+    }
+    .api-note a { color: var(--accent); }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      header { padding: 12px 16px; }
+      .grid-wrap { padding: 14px 16px; }
+      .grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+      .metrics { grid-template-columns: repeat(2, 1fr); }
+      .modal-head { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">B3 <span>Empresas</span></div>
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input id="search" type="text" placeholder="Buscar ticker ou nome…" oninput="applyFilters()">
+  </div>
+  <a class="back-link" href="index.html">← Dashboard</a>
+  <span class="header-count" id="hcount"></span>
+</header>
+
+<div class="filter-bar" id="filter-bar">
+  <div class="chip type-chip active" data-type="stock" onclick="setType(this)">Ações</div>
+  <div class="chip type-chip" data-type="fund" onclick="setType(this)">FIIs</div>
+  <div class="chip type-chip" data-type="bdr" onclick="setType(this)">BDRs</div>
+  <div class="filter-sep"></div>
+  <div id="sector-chips"></div>
+</div>
+
+<div class="grid-wrap">
+  <div id="grid-area">
+    <div class="state-box"><div class="spinner"></div>Carregando empresas da B3…</div>
+  </div>
+  <div class="load-more-wrap" id="load-more-wrap" style="display:none">
+    <button class="btn" onclick="loadMore()">Carregar mais</button>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-head" id="modal-head"></div>
+    <div class="modal-body" id="modal-body">
+      <div class="state-box"><div class="spinner"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API   = 'https://brapi.dev/api';
+const TTL   = 30 * 60 * 1000;   // 30 min cache
+const PAGE  = 40;                // cards per page
+
+let allStocks     = [];
+let filtered      = [];
+let page          = 0;
+let currentType   = 'stock';
+let currentSector = 'Todos';
+
+/* ── Cache ──────────────────────────────────── */
+function cGet(k) {
+  try {
+    const raw = localStorage.getItem('b3app_' + k);
+    if (!raw) return null;
+    const {d, t} = JSON.parse(raw);
+    return Date.now() - t < TTL ? d : null;
+  } catch { return null; }
+}
+function cSet(k, d) {
+  try { localStorage.setItem('b3app_' + k, JSON.stringify({d, t: Date.now()})); } catch {}
+}
+
+/* ── Load company list ───────────────────────── */
+async function loadList(type) {
+  const key = 'list_' + type;
+  const cached = cGet(key);
+  if (cached) return cached;
+
+  const url = `${API}/quote/list?limit=1000&type=${type}`;
+  const res  = await fetch(url);
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const json = await res.json();
+  const stocks = (json.stocks || []).filter(s => s.stock);
+  cSet(key, stocks);
+  return stocks;
+}
+
+async function init() {
+  await switchType('stock');
+}
+
+async function switchType(type) {
+  currentType   = type;
+  currentSector = 'Todos';
+  allStocks     = [];
+  filtered      = [];
+  page          = 0;
+
+  document.getElementById('grid-area').innerHTML =
+    '<div class="state-box"><div class="spinner"></div>Carregando…</div>';
+  document.getElementById('load-more-wrap').style.display = 'none';
+
+  try {
+    allStocks = await loadList(type);
+    buildSectorChips();
+    applyFilters();
+  } catch (e) {
+    document.getElementById('grid-area').innerHTML = `
+      <div class="state-box" style="color:#ff8a9e">
+        Erro ao carregar dados. Verifique a conexão.<br><br>
+        <button class="btn" onclick="switchType('${type}')">Tentar novamente</button>
+      </div>`;
+  }
+}
+
+/* ── Sectors ─────────────────────────────────── */
+function buildSectorChips() {
+  const raw = [...new Set(allStocks.map(s => s.sector).filter(Boolean))].sort();
+  const sectors = ['Todos', ...raw];
+  const container = document.getElementById('sector-chips');
+  container.innerHTML = sectors.map(s =>
+    `<span class="chip ${s === currentSector ? 'active' : ''}"
+           style="display:inline-block"
+           onclick="setSector(this,'${esc(s)}')">${s}</span>`
+  ).join('');
+}
+
+function setType(el) {
+  document.querySelectorAll('.type-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  switchType(el.dataset.type);
+}
+
+function setSector(el, sector) {
+  document.querySelectorAll('#sector-chips .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  currentSector = sector;
+  page = 0;
+  applyFilters();
+}
+
+/* ── Filter ──────────────────────────────────── */
+function applyFilters() {
+  const q = document.getElementById('search').value.toLowerCase().trim();
+  filtered = allStocks.filter(s => {
+    if (currentSector !== 'Todos' && (s.sector || '') !== currentSector) return false;
+    if (q && !s.stock.toLowerCase().includes(q) && !(s.name||'').toLowerCase().includes(q)) return false;
+    return true;
+  });
+  page = 0;
+  renderPage(true);
+}
+
+/* ── Render ──────────────────────────────────── */
+function renderPage(reset) {
+  const area = document.getElementById('grid-area');
+  const start = page * PAGE;
+  const slice = filtered.slice(start, start + PAGE);
+
+  document.getElementById('hcount').textContent =
+    filtered.length + ' empresa' + (filtered.length !== 1 ? 's' : '');
+
+  if (!filtered.length) {
+    area.innerHTML = '<div class="state-box">Nenhuma empresa encontrada.</div>';
+    document.getElementById('load-more-wrap').style.display = 'none';
+    return;
+  }
+
+  if (reset) {
+    area.innerHTML = `<div class="grid">${slice.map(cardHTML).join('')}</div>`;
+  } else {
+    area.querySelector('.grid').insertAdjacentHTML('beforeend', slice.map(cardHTML).join(''));
+  }
+
+  page++;
+  const hasMore = page * PAGE < filtered.length;
+  document.getElementById('load-more-wrap').style.display = hasMore ? 'block' : 'none';
+}
+
+function loadMore() { renderPage(false); }
+
+function cardHTML(s) {
+  const chg = s.change ?? 0;
+  const cls = chg > 0.001 ? 'up' : chg < -0.001 ? 'down' : 'flat';
+  const sign = chg > 0 ? '+' : '';
+  const price = s.close != null ? fmtR(s.close) : '—';
+  const logoEl = s.logo
+    ? `<img class="logo-img" src="${s.logo}" loading="lazy"
+            onerror="this.outerHTML='<div class=\\'logo-fb\\'>${esc2(s.stock.slice(0,4))}</div>'">`
+    : `<div class="logo-fb">${esc2(s.stock.slice(0,4))}</div>`;
+
+  return `
+    <div class="stock-card" onclick="openModal('${esc(s.stock)}')">
+      <div class="card-top">
+        ${logoEl}
+        <div class="card-info">
+          <div class="ticker">${s.stock}</div>
+          <div class="cname">${s.name || ''}</div>
+        </div>
+      </div>
+      <div class="card-price">${price}</div>
+      <div class="badge ${cls}">${sign}${chg.toFixed(2).replace('.',',')}%</div>
+      ${s.sector     ? `<div class="card-sector">${s.sector}</div>` : ''}
+      ${s.market_cap ? `<div class="card-mcap">Cap: ${fmtLarge(s.market_cap)}</div>` : ''}
+    </div>`;
+}
+
+/* ── Modal ───────────────────────────────────── */
+async function openModal(ticker) {
+  const overlay = document.getElementById('overlay');
+  const head    = document.getElementById('modal-head');
+  const body    = document.getElementById('modal-body');
+
+  const basic = allStocks.find(s => s.stock === ticker) || {};
+  head.innerHTML = headHTML(ticker, basic);
+  body.innerHTML = '<div class="state-box"><div class="spinner"></div></div>';
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  await fetchDetail(ticker, '1mo');
+}
+
+function headHTML(ticker, basic) {
+  const chg = basic.change ?? 0;
+  const cls = chg > 0.001 ? 'up' : chg < -0.001 ? 'down' : 'flat';
+  const logoEl = basic.logo
+    ? `<img class="modal-logo" src="${basic.logo}"
+            onerror="this.outerHTML='<div class=\\'modal-logo-fb\\'>${esc2(ticker.slice(0,4))}</div>'">`
+    : `<div class="modal-logo-fb">${esc2(ticker.slice(0,4))}</div>`;
+
+  return `
+    ${logoEl}
+    <div class="modal-title">
+      <div class="ticker">${ticker}</div>
+      <div class="cname">${basic.name || ''}</div>
+    </div>
+    <div class="modal-price">
+      <div class="price">${basic.close != null ? fmtR(basic.close) : '—'}</div>
+      <div class="badge ${cls}">${chg >= 0 ? '+' : ''}${chg.toFixed(2).replace('.',',')}%</div>
+    </div>
+    <button class="modal-close" onclick="closeModal()">✕</button>`;
+}
+
+async function fetchDetail(ticker, range) {
+  const body = document.getElementById('modal-body');
+  const key  = `detail_${ticker}_${range}`;
+  let data = cGet(key);
+
+  if (!data) {
+    try {
+      const url = `${API}/quote/${ticker}?range=${range}&interval=1d&fundamental=true`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const json = await res.json();
+      data = (json.results || [])[0];
+      if (data) cSet(key, data);
+    } catch {
+      body.innerHTML = `<div class="state-box" style="color:#ff8a9e">
+        Erro ao carregar dados de ${ticker}.<br><br>
+        <button class="btn" onclick="fetchDetail('${esc(ticker)}','${range}')">Tentar novamente</button>
+      </div>`;
+      return;
+    }
+  }
+
+  if (!data) { body.innerHTML = '<div class="state-box">Dados não disponíveis.</div>'; return; }
+
+  // Refresh header price
+  if (data.regularMarketPrice) {
+    const priceEl = document.querySelector('.modal-price .price');
+    if (priceEl) priceEl.textContent = fmtR(data.regularMarketPrice);
+    const chg = data.regularMarketChangePercent ?? 0;
+    const badgeEl = document.querySelector('.modal-price .badge');
+    if (badgeEl) {
+      badgeEl.textContent = (chg >= 0 ? '+' : '') + chg.toFixed(2).replace('.',',') + '%';
+      badgeEl.className = 'badge ' + (chg > 0.001 ? 'up' : chg < -0.001 ? 'down' : 'flat');
+    }
+  }
+
+  body.innerHTML = buildBody(data, ticker, range);
+
+  document.querySelectorAll('.range-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      fetchDetail(ticker, btn.dataset.range);
+    };
+  });
+}
+
+function buildBody(d, ticker, range) {
+  return `
+    ${chartSection(d, range)}
+    <p class="section-title">Indicadores de mercado</p>
+    <div class="metrics">${metricsHTML(d)}</div>
+    ${extraHTML(d)}
+  `;
+}
+
+/* ── Chart ───────────────────────────────────── */
+function chartSection(d, range) {
+  const ranges = [
+    ['5d','5D'],['1mo','1M'],['3mo','3M'],['6mo','6M'],['1y','1A'],['2y','2A']
+  ];
+  const tabs = ranges.map(([r, lbl]) =>
+    `<button class="range-btn ${r===range?'active':''}" data-range="${r}">${lbl}</button>`
+  ).join('');
+
+  const prices = (d.historicalDataPrice || []).map(p => p.close).filter(v => v != null);
+  let svg = '';
+  if (prices.length >= 2) {
+    const W = 620, H = 110;
+    const mn = Math.min(...prices), mx = Math.max(...prices);
+    const pad = (mx - mn) * 0.08 || 1;
+    const lo = mn - pad, hi = mx + pad;
+    const xs = prices.map((_, i) => (i / (prices.length - 1)) * W);
+    const ys = prices.map(p => H - ((p - lo) / (hi - lo)) * H);
+    const line = xs.map((x, i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${ys[i].toFixed(1)}`).join('');
+    const area = line + `L${W},${H}L0,${H}Z`;
+    const isUp = prices.at(-1) >= prices[0];
+    const col  = isUp ? '#00d084' : '#ff4d6d';
+
+    // Price labels
+    const last = prices.at(-1);
+    const first = prices[0];
+    const lblDiff = ((last - first) / first * 100);
+    const lblSign = lblDiff >= 0 ? '+' : '';
+
+    svg = `
+      <svg class="sparkline" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="${col}" stop-opacity="0.25"/>
+            <stop offset="100%" stop-color="${col}" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path d="${area}" fill="url(#cg)"/>
+        <path d="${line}" fill="none" stroke="${col}" stroke-width="1.8" stroke-linejoin="round"/>
+      </svg>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);padding:0 4px;margin-top:2px">
+        <span>${fmtR(first)}</span>
+        <span style="color:${isUp?'var(--green)':'var(--red)'}">
+          ${lblSign}${lblDiff.toFixed(2).replace('.',',')}%
+        </span>
+        <span>${fmtR(last)}</span>
+      </div>`;
+  } else {
+    svg = `<div style="text-align:center;color:var(--muted);font-size:12px;padding:20px 0">Histórico não disponível</div>`;
+  }
+
+  return `
+    <div class="range-row" style="margin-bottom:8px">${tabs}</div>
+    <div class="chart-box">${svg}</div>`;
+}
+
+/* ── Metrics ─────────────────────────────────── */
+function metricsHTML(d) {
+  const items = [
+    ['Preço atual',   d.regularMarketPrice          != null ? fmtR(d.regularMarketPrice)          : '—'],
+    ['Abertura',      d.regularMarketOpen            != null ? fmtR(d.regularMarketOpen)            : '—'],
+    ['Fech. anterior',d.regularMarketPreviousClose   != null ? fmtR(d.regularMarketPreviousClose)   : '—'],
+    ['Máx. do dia',   d.regularMarketDayHigh         != null ? fmtR(d.regularMarketDayHigh)         : '—'],
+    ['Mín. do dia',   d.regularMarketDayLow          != null ? fmtR(d.regularMarketDayLow)          : '—'],
+    ['Volume',        d.regularMarketVolume          != null ? fmtLarge(d.regularMarketVolume)      : '—'],
+    ['Market Cap',    d.marketCap                    != null ? fmtLarge(d.marketCap)                : '—'],
+    ['P/L',           d.priceEarnings                != null ? d.priceEarnings.toFixed(2).replace('.',',')  : '—'],
+    ['P/VP',          d.priceToBook                  != null ? d.priceToBook.toFixed(2).replace('.',',')    : '—'],
+    ['LPA',           d.earningsPerShare             != null ? fmtR(d.earningsPerShare)             : '—'],
+    ['Div. Yield',    d.dividendYield                != null ? d.dividendYield.toFixed(2).replace('.',',') + '%' : '—'],
+    ['Máx. 52 sem.',  d.fiftyTwoWeekHigh             != null ? fmtR(d.fiftyTwoWeekHigh)             : '—'],
+    ['Mín. 52 sem.',  d.fiftyTwoWeekLow              != null ? fmtR(d.fiftyTwoWeekLow)              : '—'],
+    ['Média 200d',    d.twoHundredDayAverage         != null ? fmtR(d.twoHundredDayAverage)         : '—'],
+    ['Média 50d',     d.fiftyDayAverage              != null ? fmtR(d.fiftyDayAverage)              : '—'],
+  ];
+  return items.map(([lbl, val]) => `
+    <div class="metric">
+      <div class="lbl">${lbl}</div>
+      <div class="val">${val}</div>
+    </div>`).join('');
+}
+
+/* ── Extra info ──────────────────────────────── */
+function extraHTML(d) {
+  const rows = [];
+  if (d.longName)     rows.push(['Nome completo', d.longName]);
+  if (d.currency)     rows.push(['Moeda',          d.currency]);
+  if (d.exchange)     rows.push(['Bolsa',           d.exchange]);
+  if (d.quoteType)    rows.push(['Tipo',            d.quoteType]);
+  if (d.sector)       rows.push(['Setor',           d.sector]);
+  if (d.industry)     rows.push(['Indústria',       d.industry]);
+  if (!rows.length)   return '';
+  return `
+    <p class="section-title" style="margin-top:18px">Informações</p>
+    <div class="extra-box">
+      ${rows.map(([k, v]) => `<div class="extra-row"><span class="k">${k}</span><span>${v}</span></div>`).join('')}
+    </div>`;
+}
+
+/* ── Modal close ─────────────────────────────── */
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('overlay')) closeModal();
+}
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ── Formatting ──────────────────────────────── */
+function fmtR(v) {
+  return 'R$ ' + v.toFixed(2).replace('.', ',');
+}
+function fmtLarge(n) {
+  if (n >= 1e12) return 'R$ ' + (n / 1e12).toFixed(2).replace('.', ',') + ' T';
+  if (n >= 1e9)  return 'R$ ' + (n / 1e9 ).toFixed(2).replace('.', ',') + ' B';
+  if (n >= 1e6)  return 'R$ ' + (n / 1e6 ).toFixed(2).replace('.', ',') + ' M';
+  if (n >= 1e3)  return 'R$ ' + (n / 1e3 ).toFixed(2).replace('.', ',') + ' K';
+  return 'R$ ' + n.toFixed(0);
+}
+function esc(s)  { return String(s).replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+function esc2(s) { return String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ── Boot ────────────────────────────────────── */
+init();
+</script>
+</body>
+</html>
