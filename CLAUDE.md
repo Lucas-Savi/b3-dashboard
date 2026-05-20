@@ -45,4 +45,4 @@ To reset to defaults, clear these two keys in DevTools → Application → Local
 
 ## Git workflow
 
-Changes are committed and pushed automatically — no manual `git push` needed. The commit message includes the date/time of the change.
+Changes are committed and pushed automatically via a PostToolUse hook — no manual `git push` needed. The commit message includes the date/time of the change (`Auto-update: YYYY-MM-DD HH:mm`).
