@@ -861,21 +861,34 @@ function grahamCard(g) {
   if (!g) return `<div class="gcard"><div class="stitle">Análise Benjamin Graham</div>
     <div style="font-size:13px;color:var(--muted);margin-top:8px">LPA não disponível para esta ação.</div></div>`;
 
-  const viStr = g.vi != null ? fmtR(g.vi) : '—';
+  const viStr   = g.vi != null ? fmtR(g.vi) : '—';
   const msColor = g.ms==null?'var(--muted)':g.ms>=30?'#00ff96':g.ms>=10?'var(--green)':g.ms>=0?'var(--yellow)':'var(--red)';
   const msCls   = g.ms==null?'ms-na':g.ms>=30?'ms-strong':g.ms>=10?'ms-good':g.ms>=0?'ms-fair':'ms-over';
   const msStr   = g.ms!=null?(g.ms>=0?'+':'')+g.ms.toFixed(1).replace('.',',')+'%':'—';
   const status  = g.ms==null?'Sem dados':g.ms>=30?'Forte oportunidade':g.ms>=10?'Subvalorizada':g.ms>=0?'Levemente subv.':g.ms>=-20?'Sobrevalorizada':'Muito sobrevalorizada';
+  const barPct  = g.ms!=null ? Math.min(Math.max((g.ms+100)/200*100, 0), 100) : 50;
+  const barCol  = g.ms!=null && g.ms>=0 ? 'var(--green)' : g.ms!=null ? 'var(--red)' : 'var(--muted)';
+  const dots    = [g.c1,g.c2,g.c3,g.c4,g.c5].map(v=>`<div class="dot ${v?'on':'off'}" style="width:9px;height:9px"></div>`).join('');
 
-  const barPct = g.ms!=null ? Math.min(Math.max((g.ms+100)/200*100, 0), 100) : 50;
-  const barCol = g.ms!=null && g.ms>=0 ? 'var(--green)' : g.ms!=null ? 'var(--red)' : 'var(--muted)';
-  const dots   = [g.c1,g.c2,g.c3,g.c4,g.c5].map(v=>`<div class="dot ${v?'on':'off'}" style="width:9px;height:9px"></div>`).join('');
+  // Formula label and breakdown differ by which formula was used
+  const isRevised = g.formula === 'revised';
+  const formulaLabel = isRevised
+    ? 'V* = √(22,5 × LPA × VPA)'
+    : `V* = LPA × (8,5 + 2g) × 4,4/Y`;
+  const breakdown = g.vi != null ? `
+    <div class="calc-bd">
+      ${isRevised
+        ? `V* = √(22,5 × <strong style="color:var(--text)">${fmtR(g.lpa)}</strong> × <strong style="color:var(--text)">${fmtR(g.vpa)}</strong>) = <strong style="color:var(--accent)">${fmtR(g.vi)}</strong>`
+        : `V* = ${g.lpa.toFixed(4)} × (8,5 + ${2*g.g}) × (4,4 ÷ ${g.y}) = <strong style="color:var(--accent)">${fmtR(g.vi)}</strong>
+           &nbsp;<span style="color:var(--muted)">[g=${g.g}%, Y=${g.y}% — configure em ⚙]</span>`
+      }
+    </div>` : '';
 
   const crits = [
-    [g.c1, 'LPA positivo',             g.lpa !=null ? fmtR(g.lpa)              : '—'],
-    [g.c2, 'P/L ≤ 15',                 g.pl  !=null ? g.pl.toFixed(2).replace('.',',')  : '—'],
-    [g.c3, 'P/VP ≤ 1,5',              g.pvp !=null ? g.pvp.toFixed(2).replace('.',',') : '—'],
-    [g.c4, 'P/L × P/VP ≤ 22,5',       (g.pl&&g.pvp) ? (g.pl*g.pvp).toFixed(2).replace('.',',') : '—'],
+    [g.c1, 'LPA positivo',            g.lpa !=null ? fmtR(g.lpa) : '—'],
+    [g.c2, 'P/L ≤ 15',                g.pl  !=null ? g.pl.toFixed(2).replace('.',',') : '—'],
+    [g.c3, 'P/VP ≤ 1,5',             g.pvp !=null ? g.pvp.toFixed(2).replace('.',',') : (isRevised ? '—' : 'N/D nesta fórmula')],
+    [g.c4, 'P/L × P/VP ≤ 22,5',      (g.pl&&g.pvp) ? (g.pl*g.pvp).toFixed(2).replace('.',',') : (isRevised ? '—' : 'N/D nesta fórmula')],
     [g.c5, 'Margem de segurança ≥ 20%', msStr],
   ].map(([ok, lbl, val]) => `
     <div class="crit">
@@ -883,20 +896,18 @@ function grahamCard(g) {
       <div class="ctxt"><div>${lbl}</div><div class="cval">${val}</div></div>
     </div>`).join('');
 
-  const breakdown = g.vi != null ? `
-    <div class="calc-bd">
-      V* = √(22,5 × <strong style="color:var(--text)">${fmtR(g.lpa)}</strong> LPA ×
-      <strong style="color:var(--text)">${fmtR(g.vpa)}</strong> VPA)
-      = <strong style="color:var(--accent)">${fmtR(g.vi)}</strong>
-    </div>` : '';
-
   return `<div class="gcard">
-    <div class="stitle">Análise Benjamin Graham</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div class="stitle">Análise Benjamin Graham</div>
+      <span style="font-size:10px;padding:2px 8px;border-radius:10px;background:var(--card);border:1px solid var(--border);color:var(--muted)">
+        ${isRevised ? '√ Fórmula Revisada' : 'Fórmula Original'}
+      </span>
+    </div>
     <div class="gcard-head">
       <div>
         <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Valor Intrínseco</div>
         <div class="vi-val">${viStr}</div>
-        <div class="vi-sub">V* = √(22,5 × LPA × VPA)</div>
+        <div class="vi-sub">${formulaLabel}</div>
       </div>
       <div class="ms-side">
         <div class="ms-lbl">Margem de Segurança</div>
