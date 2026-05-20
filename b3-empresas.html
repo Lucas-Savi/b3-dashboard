@@ -817,8 +817,9 @@ async function fetchDetail(ticker, range) {
       data = (json.results||[])[0];
       if (data) {
         cSet(key, data);
-        gData[ticker] = data;
-        cSet('fund_' + ticker, data);
+        // Merge: preserve any fundamental=true fields already in gData
+        gData[ticker] = Object.assign({}, gData[ticker] || {}, data);
+        cSet('fund_' + ticker, gData[ticker]);
       }
     } catch {
       body.innerHTML = `<div class="sbox" style="color:#ff8a9e">
