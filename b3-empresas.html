@@ -343,17 +343,25 @@ let gSort = { col: 'ms', dir: -1 };
 
 /* ── Config ── */
 function getCfg() {
-  try { return JSON.parse(localStorage.getItem('b3cfg') || '{}'); } catch { return {}; }
+  try {
+    const s = JSON.parse(localStorage.getItem('b3cfg') || '{}');
+    return { token: s.token || '', g: s.g ?? 5, y: s.y ?? 10.5 };
+  } catch { return { token: '', g: 5, y: 10.5 }; }
 }
 function toggleCfg() {
   const p = document.getElementById('settings-panel');
   if (p.classList.toggle('open')) {
-    document.getElementById('cfg-token').value = getCfg().token || '';
+    const s = getCfg();
+    document.getElementById('cfg-token').value = s.token;
+    document.getElementById('cfg-g').value     = s.g;
+    document.getElementById('cfg-y').value     = s.y;
   }
 }
 function saveCfg() {
   const token = document.getElementById('cfg-token').value.trim();
-  localStorage.setItem('b3cfg', JSON.stringify({ token }));
+  const g     = parseFloat(document.getElementById('cfg-g').value) || 5;
+  const y     = parseFloat(document.getElementById('cfg-y').value) || 10.5;
+  localStorage.setItem('b3cfg', JSON.stringify({ token, g, y }));
   document.getElementById('settings-panel').classList.remove('open');
   // Reset so next Graham load uses new token
   gLoaded = false; gLoading = false; gData = {};
