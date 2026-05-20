@@ -88,16 +88,23 @@ All endpoints work without a token. A free token from brapi.dev removes rate lim
 
 ### Graham formula
 
-**Revised Benjamin Graham formula:**
+Two formulas, selected automatically by `calcG()`:
+
+**Revised** (preferred — used in table after modal opens for that stock):
 ```
 V* = sqrt(22.5 × LPA × VPA)
 ```
-- `LPA` = `earningsPerShare` (root level field)
-- `VPA` = `bookValue` (from `defaultKeyStatistics`)
-- `22.5` = Graham's combined P/L and P/VP ceiling (15 × 1.5)
-- Margin of Safety = (V* − Price) / V* × 100
+Requires `VPA = bookValue` from `defaultKeyStatistics` (only available after modal fetch).
 
-Formula only applies when both LPA > 0 and VPA > 0.
+**Original** (fallback — used in table for all stocks from bulk load):
+```
+V* = LPA × (8.5 + 2g) × (4.4 / Y)
+```
+- `g` = expected annual growth rate (user setting, default 5%)
+- `Y` = Selic / risk-free rate (user setting, default 10.5%)
+- Only requires `earningsPerShare` — always available from `fundamental=true`
+
+Both: Margin of Safety = (V* − Price) / V* × 100
 
 **5 Graham criteria evaluated per stock:**
 1. LPA > 0 (profitable)
