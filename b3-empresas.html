@@ -584,7 +584,13 @@ async function fetchBatch(tickers, attempt) {
   } catch {}
 }
 
-/* ── Graham calculation ── */
+/* ── Graham calculation ──────────────────────────────────────
+   Two formulas, chosen automatically:
+   - Revised  (preferred): V* = √(22.5 × LPA × VPA)
+       requires VPA (bookValue) — available after opening modal
+   - Original (fallback):  V* = LPA × (8.5 + 2g) × 4.4 / Y
+       requires only LPA — always available from fundamental=true
+────────────────────────────────────────────────────────────── */
 function calcG(ticker) {
   const d = gData[ticker];
   if (!d) return null;
@@ -592,16 +598,15 @@ function calcG(ticker) {
   const price = d.regularMarketPrice;
   if (!price || price <= 0) return null;
 
-  const lpa  = d.earningsPerShare;
-  const ks   = d.defaultKeyStatistics || {};
-  const fd   = d.financialData || {};
-  const sp   = d.summaryProfile || {};
+  const lpa = d.earningsPerShare;
+  const pl  = d.priceEarnings;
+  const ks  = d.defaultKeyStatistics || {};
+  const fd  = d.financialData || {};
+  const sp  = d.summaryProfile || {};
 
-  // Core Graham values — bookValue is VPA directly from the API
   const vpa  = ks.bookValue;
   const pvp  = ks.priceToBook;
-  const pl   = d.priceEarnings || ks.trailingPE;
-  const dy   = ks.dividendYield;
+  const dy   = ks.dividendYield ?? d.dividendYield;
   const roe  = ks.returnOnEquity ?? fd.returnOnEquity;
   const beta = ks.beta;
   const de   = ks.debtToEquity  ?? fd.debtToEquity;
@@ -610,23 +615,33 @@ function calcG(ticker) {
   const evebitda = ks.enterpriseToEbitda;
   const margins  = fd.profitMargins;
 
-  // Revised Graham formula: V* = √(22.5 × LPA × VPA)
-  let vi = null, ms = null;
+  const { g, y } = getCfg();
+
+  let vi = null, ms = null, formula = null;
+
   if (lpa > 0 && vpa > 0) {
+    // Revised Graham — more accurate, used when modal data is available
     vi = Math.sqrt(22.5 * lpa * vpa);
     ms = (vi - price) / vi * 100;
+    formula = 'revised';
+  } else if (lpa > 0 && y > 0) {
+    // Original Graham — always works with fundamental=true data
+    vi = lpa * (8.5 + 2 * g) * (4.4 / y);
+    ms = (vi - price) / vi * 100;
+    formula = 'original';
   }
 
   // 5 Graham criteria
-  const c1 = lpa != null && lpa > 0;                       // LPA positivo
-  const c2 = pl  != null && pl  > 0 && pl  <= 15;          // P/L ≤ 15
-  const c3 = pvp != null && pvp > 0 && pvp <= 1.5;         // P/VP ≤ 1,5
-  const c4 = pl  != null && pvp != null && pl * pvp <= 22.5;// P/L × P/VP ≤ 22,5
-  const c5 = ms  != null && ms  >= 20;                     // Margem ≥ 20%
+  const c1 = lpa != null && lpa > 0;
+  const c2 = pl  != null && pl  > 0 && pl  <= 15;
+  const c3 = pvp != null && pvp > 0 && pvp <= 1.5;
+  const c4 = pl  != null && pvp != null && pl * pvp <= 22.5;
+  const c5 = ms  != null && ms  >= 20;
   const score = [c1,c2,c3,c4,c5].filter(Boolean).length;
 
   return { price, lpa, vpa, pvp, pl, dy, roe, beta, de, cr, peg, evebitda, margins,
-           vi, ms, score, c1, c2, c3, c4, c5, sector: sp.sector, industry: sp.industry };
+           vi, ms, formula, g, y, score, c1, c2, c3, c4, c5,
+           sector: sp.sector, industry: sp.industry };
 }
 
 /* ── Table ── */
