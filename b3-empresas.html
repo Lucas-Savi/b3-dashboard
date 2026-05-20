@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>B3 — Empresas Listadas</title>
+  <title>B3 — Empresas & Graham</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -14,195 +14,209 @@
       --accent:  #4f8ef7;
       --green:   #00d084;
       --red:     #ff4d6d;
+      --yellow:  #f0c040;
       --text:    #e0e0f0;
       --muted:   #6a6a90;
       --header:  #0f0f22;
     }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      min-height: 100vh;
-    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; min-height: 100vh; }
 
     /* ── Header ── */
     header {
       position: sticky; top: 0; z-index: 100;
-      background: var(--header);
-      border-bottom: 1px solid var(--border);
-      padding: 14px 24px;
-      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+      background: var(--header); border-bottom: 1px solid var(--border);
+      padding: 12px 24px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
     }
-    .logo { font-size: 18px; font-weight: 700; color: var(--accent); white-space: nowrap; letter-spacing: -0.3px; }
+    .logo { font-size: 17px; font-weight: 700; color: var(--accent); white-space: nowrap; }
     .logo span { color: var(--text); }
-    .search-wrap { flex: 1; min-width: 180px; max-width: 460px; position: relative; }
+    .search-wrap { flex: 1; min-width: 160px; max-width: 420px; position: relative; }
     .search-wrap input {
-      width: 100%; padding: 9px 14px 9px 38px;
+      width: 100%; padding: 8px 12px 8px 36px;
       background: var(--card2); border: 1px solid var(--border);
-      border-radius: 8px; color: var(--text); font-size: 14px; outline: none;
-      transition: border-color 0.15s;
+      border-radius: 8px; color: var(--text); font-size: 13px; outline: none; transition: border-color 0.15s;
     }
     .search-wrap input:focus { border-color: var(--accent); }
     .search-wrap input::placeholder { color: var(--muted); }
-    .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 15px; pointer-events: none; }
-    .header-count { color: var(--muted); font-size: 13px; white-space: nowrap; margin-left: auto; }
-    .back-link { color: var(--muted); font-size: 13px; text-decoration: none; padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; transition: all 0.15s; }
+    .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 14px; pointer-events: none; }
+
+    .view-toggle { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; flex-shrink: 0; }
+    .view-btn { padding: 7px 14px; background: none; border: none; color: var(--muted); cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.15s; }
+    .view-btn.active { background: var(--accent); color: #fff; }
+    .view-btn:not(.active):hover { background: var(--card2); color: var(--text); }
+
+    .header-count { color: var(--muted); font-size: 12px; white-space: nowrap; margin-left: auto; }
+    .back-link { color: var(--muted); font-size: 12px; text-decoration: none; padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; transition: all 0.15s; flex-shrink: 0; }
     .back-link:hover { color: var(--text); border-color: var(--muted); }
 
     /* ── Filter bar ── */
     .filter-bar {
       background: var(--header); border-bottom: 1px solid var(--border);
-      padding: 10px 24px; display: flex; gap: 6px; flex-wrap: nowrap;
-      overflow-x: auto; scrollbar-width: none;
+      padding: 9px 24px; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; align-items: center;
     }
     .filter-bar::-webkit-scrollbar { display: none; }
-    .filter-sep { width: 1px; background: var(--border); margin: 2px 4px; flex-shrink: 0; }
+    .filter-sep { width: 1px; min-height: 22px; background: var(--border); margin: 0 4px; flex-shrink: 0; }
     .chip {
-      padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 500;
+      padding: 4px 13px; border-radius: 20px; font-size: 12px; font-weight: 500;
       cursor: pointer; border: 1px solid var(--border); background: transparent;
       color: var(--muted); white-space: nowrap; transition: all 0.15s; flex-shrink: 0;
     }
     .chip:hover { color: var(--text); border-color: var(--muted); }
     .chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-    .chip.type-chip.active { background: #7c5cbf; border-color: #7c5cbf; }
+    .chip.type-chip.active { background: #6b4fcc; border-color: #6b4fcc; }
+    .chip.ms-chip.active { background: #1a7a4a; border-color: #00d084; color: var(--green); }
 
-    /* ── Grid ── */
-    .grid-wrap { padding: 20px 24px; }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-      gap: 12px;
-    }
+    /* ── Shared state / loading ── */
+    .state-box { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 14px; }
+    .spinner { width: 36px; height: 36px; margin: 0 auto 14px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.75s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .btn { padding: 8px 20px; background: var(--accent); border: none; border-radius: 8px; color: #fff; cursor: pointer; font-size: 13px; font-weight: 500; transition: opacity 0.15s; }
+    .btn:hover { opacity: 0.85; }
 
-    /* ── Stock Card ── */
+    /* ── Cards view ── */
+    .grid-wrap { padding: 18px 24px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+    .load-more-wrap { text-align: center; padding: 22px 0 30px; }
+
     .stock-card {
       background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-      padding: 16px; cursor: pointer; transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
-      display: flex; flex-direction: column; gap: 0;
+      padding: 15px; cursor: pointer; transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
     }
-    .stock-card:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 4px 20px rgba(79,142,247,0.12); }
-    .card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-    .logo-img {
-      width: 34px; height: 34px; border-radius: 7px; object-fit: contain;
-      background: #fff; padding: 3px; flex-shrink: 0;
-    }
-    .logo-fb {
-      width: 34px; height: 34px; border-radius: 7px; flex-shrink: 0;
-      background: var(--accent); display: flex; align-items: center; justify-content: center;
-      font-size: 10px; font-weight: 700; color: #fff;
-    }
-    .card-info .ticker { font-size: 14px; font-weight: 700; line-height: 1; }
-    .card-info .cname {
-      font-size: 11px; color: var(--muted); margin-top: 3px;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px;
-    }
-    .card-price { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
-    .badge {
-      display: inline-block; padding: 2px 9px; border-radius: 12px;
-      font-size: 11px; font-weight: 600; margin-top: 5px;
-    }
+    .stock-card:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 4px 20px rgba(79,142,247,0.1); }
+    .card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 11px; }
+    .logo-img { width: 32px; height: 32px; border-radius: 7px; object-fit: contain; background: #fff; padding: 3px; flex-shrink: 0; }
+    .logo-fb { width: 32px; height: 32px; border-radius: 7px; flex-shrink: 0; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #fff; }
+    .card-info .ticker { font-size: 13px; font-weight: 700; }
+    .card-info .cname { font-size: 11px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
+    .card-price { font-size: 17px; font-weight: 600; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; margin-top: 4px; }
     .up   { background: rgba(0,208,132,0.12); color: var(--green); }
     .down { background: rgba(255,77,109,0.12); color: var(--red); }
     .flat { background: rgba(106,106,144,0.15); color: var(--muted); }
-    .card-sector { font-size: 11px; color: var(--muted); margin-top: 9px; }
+    .card-sector { font-size: 11px; color: var(--muted); margin-top: 8px; }
     .card-mcap   { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
-    /* ── Loading / Empty ── */
-    .state-box { text-align: center; padding: 70px 20px; color: var(--muted); }
-    .spinner {
-      width: 38px; height: 38px; margin: 0 auto 14px;
-      border: 3px solid var(--border); border-top-color: var(--accent);
-      border-radius: 50%; animation: spin 0.75s linear infinite;
+    /* ── Graham view ── */
+    #graham-outer { padding: 18px 24px 40px; }
+
+    .graham-progress { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; }
+    .progress-top { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 10px; }
+    .progress-bar-bg { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+    .progress-bar-fg { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.4s; }
+
+    .graham-summary { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .gsum { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; flex: 1; min-width: 120px; }
+    .gsum .gl { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .gsum .gv { font-size: 18px; font-weight: 700; margin-top: 4px; }
+
+    .graham-filters { display: flex; gap: 6px; margin-bottom: 14px; }
+
+    .gtable-wrap { overflow-x: auto; }
+    .gtable { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 780px; }
+    .gtable thead th {
+      padding: 9px 12px; text-align: left; font-size: 11px; font-weight: 600;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;
+      border-bottom: 2px solid var(--border); cursor: pointer; user-select: none; white-space: nowrap;
+      position: sticky; top: 0; background: var(--bg); z-index: 1;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .btn { padding: 9px 22px; background: var(--accent); border: none; border-radius: 8px; color: #fff; cursor: pointer; font-size: 14px; font-weight: 500; transition: opacity 0.15s; }
-    .btn:hover { opacity: 0.85; }
-    .load-more-wrap { text-align: center; padding: 24px 0 32px; }
+    .gtable thead th:hover { color: var(--text); }
+    .gtable thead th.sorted { color: var(--accent); }
+    .sort-arr { margin-left: 3px; opacity: 0.4; font-size: 10px; }
+    .gtable thead th.sorted .sort-arr { opacity: 1; }
+    .gtable tbody tr { transition: background 0.1s; cursor: pointer; }
+    .gtable tbody tr:hover td { background: rgba(79,142,247,0.05); }
+    .gtable td { padding: 11px 12px; border-bottom: 1px solid rgba(37,37,64,0.6); vertical-align: middle; }
+    .gtable .rank-col { color: var(--muted); font-size: 12px; width: 36px; }
+    .gtable .ticker-col { font-weight: 700; font-size: 13px; }
+    .gtable .name-col { color: var(--muted); font-size: 12px; max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .gtable .num { font-size: 13px; }
+    .gtable .na-text { color: var(--muted); font-size: 12px; }
+
+    .ms-strong { background: rgba(0,255,150,0.12); color: #00ff96; }
+    .ms-good   { background: rgba(0,208,132,0.12); color: var(--green); }
+    .ms-fair   { background: rgba(240,192,64,0.1); color: var(--yellow); }
+    .ms-over   { background: rgba(255,77,109,0.12); color: var(--red); }
+    .ms-na     { background: rgba(106,106,144,0.12); color: var(--muted); }
+
+    .score-dots { display: flex; gap: 3px; align-items: center; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; }
+    .dot.on  { background: var(--accent); }
+    .dot.off { background: var(--border); }
 
     /* ── Modal ── */
-    .overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 200;
-      display: flex; align-items: center; justify-content: center; padding: 16px;
-      opacity: 0; pointer-events: none; transition: opacity 0.2s;
-    }
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 16px; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
     .overlay.open { opacity: 1; pointer-events: all; }
-    .modal {
-      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
-      width: 100%; max-width: 660px; max-height: 92vh; overflow-y: auto;
-      transform: translateY(18px); transition: transform 0.22s;
-      scrollbar-width: thin; scrollbar-color: var(--border) transparent;
-    }
+    .modal { background: var(--card); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 660px; max-height: 92vh; overflow-y: auto; transform: translateY(18px); transition: transform 0.22s; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
     .overlay.open .modal { transform: translateY(0); }
 
-    .modal-head {
-      display: flex; align-items: center; gap: 14px;
-      padding: 18px 22px; border-bottom: 1px solid var(--border);
-      position: sticky; top: 0; background: var(--card); z-index: 1;
-    }
-    .modal-logo { width: 46px; height: 46px; border-radius: 10px; object-fit: contain; background: #fff; padding: 4px; flex-shrink: 0; }
-    .modal-logo-fb {
-      width: 46px; height: 46px; border-radius: 10px; flex-shrink: 0;
-      background: var(--accent); display: flex; align-items: center; justify-content: center;
-      font-size: 13px; font-weight: 700; color: #fff;
-    }
-    .modal-title .ticker { font-size: 20px; font-weight: 700; line-height: 1.1; }
-    .modal-title .cname  { font-size: 13px; color: var(--muted); margin-top: 3px; }
+    .modal-head { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--card); z-index: 1; }
+    .modal-logo { width: 44px; height: 44px; border-radius: 10px; object-fit: contain; background: #fff; padding: 4px; flex-shrink: 0; }
+    .modal-logo-fb { width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; }
+    .modal-title .ticker { font-size: 18px; font-weight: 700; }
+    .modal-title .cname  { font-size: 12px; color: var(--muted); margin-top: 2px; }
     .modal-price { margin-left: auto; text-align: right; }
-    .modal-price .price { font-size: 22px; font-weight: 700; }
-    .modal-price .badge { font-size: 12px; }
-    .modal-close {
-      margin-left: 10px; background: none; border: 1px solid var(--border);
-      color: var(--muted); cursor: pointer; font-size: 16px; padding: 5px 10px;
-      border-radius: 7px; transition: all 0.15s; flex-shrink: 0;
-    }
-    .modal-close:hover { color: var(--text); border-color: var(--muted); background: var(--card2); }
-    .modal-body { padding: 20px 22px 28px; }
+    .modal-price .price { font-size: 20px; font-weight: 700; }
+    .modal-close { margin-left: 8px; background: none; border: 1px solid var(--border); color: var(--muted); cursor: pointer; font-size: 15px; padding: 5px 9px; border-radius: 7px; transition: all 0.15s; flex-shrink: 0; }
+    .modal-close:hover { color: var(--text); border-color: var(--muted); }
+    .modal-body { padding: 18px 20px 26px; }
 
     /* Range tabs */
-    .range-row { display: flex; gap: 5px; margin-bottom: 10px; }
-    .range-btn {
-      padding: 4px 13px; border-radius: 6px; font-size: 12px; font-weight: 500;
-      cursor: pointer; border: 1px solid var(--border); background: none; color: var(--muted);
-      transition: all 0.15s;
-    }
+    .range-row { display: flex; gap: 5px; margin-bottom: 8px; }
+    .range-btn { padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: none; color: var(--muted); transition: all 0.15s; }
     .range-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
     .range-btn:hover:not(.active) { border-color: var(--muted); color: var(--text); }
 
     /* Chart */
-    .chart-box { background: var(--card2); border-radius: 10px; padding: 10px 10px 6px; margin-bottom: 18px; }
-    svg.sparkline { width: 100%; height: 120px; display: block; }
+    .chart-box { background: var(--card2); border-radius: 10px; padding: 8px 8px 4px; margin-bottom: 16px; }
+    svg.sparkline { width: 100%; height: 110px; display: block; }
 
-    /* Metrics */
-    .section-title { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px; }
-    .metrics {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-bottom: 18px;
+    /* Graham modal card */
+    .graham-card {
+      background: var(--card2); border: 1px solid var(--border); border-radius: 12px;
+      padding: 16px; margin-bottom: 16px;
     }
-    .metric { background: var(--card2); border-radius: 9px; padding: 13px 14px; }
+    .graham-card-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
+    .graham-card-head .sec-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+    .vi-main { font-size: 26px; font-weight: 700; }
+    .vi-formula { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .ms-display { text-align: right; }
+    .ms-pct { font-size: 26px; font-weight: 700; }
+    .ms-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+
+    /* MS bar */
+    .ms-bar-wrap { margin-bottom: 14px; }
+    .ms-bar-bg { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; position: relative; }
+    .ms-bar-fg { height: 100%; border-radius: 4px; transition: width 0.4s; }
+    .ms-bar-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+    /* Criteria */
+    .criteria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .criterion { display: flex; align-items: center; gap: 8px; font-size: 12px; background: var(--bg); border-radius: 7px; padding: 8px 10px; }
+    .crit-icon { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+    .crit-icon.pass { background: rgba(0,208,132,0.2); color: var(--green); }
+    .crit-icon.fail { background: rgba(255,77,109,0.15); color: var(--red); }
+    .crit-text { line-height: 1.3; }
+    .crit-val { color: var(--muted); font-size: 11px; }
+
+    /* Metrics grid */
+    .section-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px; }
+    .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+    .metric { background: var(--card2); border-radius: 8px; padding: 11px 12px; }
     .metric .lbl { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .metric .val { font-size: 15px; font-weight: 600; margin-top: 5px; }
+    .metric .val { font-size: 14px; font-weight: 600; margin-top: 4px; }
 
     /* Extra info */
-    .extra-box { background: var(--card2); border-radius: 10px; padding: 14px 16px; }
-    .extra-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .extra-box { background: var(--card2); border-radius: 10px; padding: 12px 14px; }
+    .extra-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(37,37,64,0.6); font-size: 12px; }
     .extra-row:last-child { border-bottom: none; padding-bottom: 0; }
     .extra-row .k { color: var(--muted); }
 
-    /* API key banner */
-    .api-note {
-      background: rgba(79,142,247,0.08); border: 1px solid rgba(79,142,247,0.25);
-      border-radius: 10px; padding: 12px 16px; font-size: 12px; color: #8db4ff;
-      margin-bottom: 18px; line-height: 1.6;
-    }
-    .api-note a { color: var(--accent); }
-
-    /* Responsive */
     @media (max-width: 640px) {
-      header { padding: 12px 16px; }
-      .grid-wrap { padding: 14px 16px; }
-      .grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+      header { padding: 10px 14px; }
+      .grid-wrap, #graham-outer { padding: 12px 14px; }
+      .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
       .metrics { grid-template-columns: repeat(2, 1fr); }
-      .modal-head { flex-wrap: wrap; }
+      .criteria-grid { grid-template-columns: 1fr; }
+      .graham-summary { flex-direction: column; }
     }
   </style>
 </head>
@@ -214,25 +228,78 @@
     <span class="search-icon">⌕</span>
     <input id="search" type="text" placeholder="Buscar ticker ou nome…" oninput="applyFilters()">
   </div>
+  <div class="view-toggle">
+    <button class="view-btn active" id="view-cards" onclick="setView('cards')">Cards</button>
+    <button class="view-btn" id="view-graham" onclick="setView('graham')">Graham</button>
+  </div>
   <a class="back-link" href="index.html">← Dashboard</a>
   <span class="header-count" id="hcount"></span>
 </header>
 
-<div class="filter-bar" id="filter-bar">
+<div class="filter-bar">
   <div class="chip type-chip active" data-type="stock" onclick="setType(this)">Ações</div>
   <div class="chip type-chip" data-type="fund" onclick="setType(this)">FIIs</div>
   <div class="chip type-chip" data-type="bdr" onclick="setType(this)">BDRs</div>
   <div class="filter-sep"></div>
-  <div id="sector-chips"></div>
+  <div id="sector-chips" style="display:contents"></div>
 </div>
 
-<div class="grid-wrap">
-  <div id="grid-area">
-    <div class="state-box"><div class="spinner"></div>Carregando empresas da B3…</div>
+<!-- Cards view -->
+<div id="cards-outer">
+  <div class="grid-wrap">
+    <div id="grid-area">
+      <div class="state-box"><div class="spinner"></div>Carregando empresas da B3…</div>
+    </div>
+    <div class="load-more-wrap" id="load-more-wrap" style="display:none">
+      <button class="btn" onclick="loadMore()">Carregar mais</button>
+    </div>
   </div>
-  <div class="load-more-wrap" id="load-more-wrap" style="display:none">
-    <button class="btn" onclick="loadMore()">Carregar mais</button>
+</div>
+
+<!-- Graham view -->
+<div id="graham-outer" style="display:none">
+  <div id="graham-progress" style="display:none" class="graham-progress">
+    <div class="progress-top">
+      <span id="prog-label">Buscando dados fundamentalistas…</span>
+      <span id="prog-pct" style="color:var(--accent)">0%</span>
+    </div>
+    <div class="progress-bar-bg"><div class="progress-bar-fg" id="prog-bar" style="width:0%"></div></div>
   </div>
+
+  <div id="graham-summary" class="graham-summary" style="display:none">
+    <div class="gsum"><div class="gl">Analisadas</div><div class="gv" id="gs-total">—</div></div>
+    <div class="gsum"><div class="gl">Subvalorizadas</div><div class="gv" style="color:var(--green)" id="gs-under">—</div></div>
+    <div class="gsum"><div class="gl">MS &gt; 20%</div><div class="gv" style="color:#00ff96" id="gs-strong">—</div></div>
+    <div class="gsum"><div class="gl">Média MS</div><div class="gv" id="gs-avg">—</div></div>
+  </div>
+
+  <div class="graham-filters" id="graham-filters" style="display:none">
+    <span class="chip ms-chip active" data-mf="all"   onclick="setMsFilter(this,'all')">Todas</span>
+    <span class="chip ms-chip" data-mf="under" onclick="setMsFilter(this,'under')">Subvalorizadas (MS &gt; 0)</span>
+    <span class="chip ms-chip" data-mf="strong" onclick="setMsFilter(this,'strong')">Forte oportunidade (MS &gt; 20%)</span>
+  </div>
+
+  <div class="gtable-wrap" id="gtable-wrap" style="display:none">
+    <table class="gtable" id="gtable">
+      <thead>
+        <tr>
+          <th class="rank-col">#</th>
+          <th onclick="sortGraham('ticker')">Ticker <span class="sort-arr">↕</span></th>
+          <th onclick="sortGraham('name')">Nome <span class="sort-arr">↕</span></th>
+          <th onclick="sortGraham('price')">Preço <span class="sort-arr">↕</span></th>
+          <th onclick="sortGraham('vi')" class="sorted">V. Intrínseco <span class="sort-arr">↓</span></th>
+          <th onclick="sortGraham('ms')">Margem Seg. <span class="sort-arr">↕</span></th>
+          <th onclick="sortGraham('lpa')">LPA <span class="sort-arr">↕</span></th>
+          <th onclick="sortGraham('vpa')">VPA <span class="sort-arr">↕</span></th>
+          <th onclick="sortGraham('pl')">P/L <span class="sort-arr">↕</span></th>
+          <th onclick="sortGraham('pvp')">P/VP <span class="sort-arr">↕</span></th>
+          <th onclick="sortGraham('score')">Score <span class="sort-arr">↕</span></th>
+        </tr>
+      </thead>
+      <tbody id="gtbody"></tbody>
+    </table>
+  </div>
+  <div id="graham-area"></div>
 </div>
 
 <!-- Modal -->
@@ -246,64 +313,74 @@
 </div>
 
 <script>
-const API   = 'https://brapi.dev/api';
-const TTL   = 30 * 60 * 1000;   // 30 min cache
-const PAGE  = 40;                // cards per page
+const API  = 'https://brapi.dev/api';
+const TTL  = 30 * 60 * 1000;       // 30 min for list/prices
+const GTTL = 8 * 60 * 60 * 1000;   // 8 h for fundamentals
+const PAGE = 40;
+const BATCH = 15;                   // tickers per fundamental request
+const BATCH_DELAY = 400;            // ms between batches (rate limit)
 
 let allStocks     = [];
 let filtered      = [];
 let page          = 0;
 let currentType   = 'stock';
 let currentSector = 'Todos';
+let currentView   = 'cards';
+let msFilter      = 'all';
+let grahamData    = {};             // ticker -> fundamental object
+let grahamLoading = false;
+let grahamLoaded  = false;
+let gSort         = { col: 'ms', dir: -1 };
 
-/* ── Cache ──────────────────────────────────── */
-function cGet(k) {
+/* ── Cache ── */
+function cGet(k, ttl) {
   try {
     const raw = localStorage.getItem('b3app_' + k);
     if (!raw) return null;
     const {d, t} = JSON.parse(raw);
-    return Date.now() - t < TTL ? d : null;
+    return Date.now() - t < ttl ? d : null;
   } catch { return null; }
 }
 function cSet(k, d) {
   try { localStorage.setItem('b3app_' + k, JSON.stringify({d, t: Date.now()})); } catch {}
 }
 
-/* ── Load company list ───────────────────────── */
+/* ── List API ── */
 async function loadList(type) {
-  const key = 'list_' + type;
-  const cached = cGet(key);
+  const cached = cGet('list_' + type, TTL);
   if (cached) return cached;
-
-  const url = `${API}/quote/list?limit=1000&type=${type}`;
-  const res  = await fetch(url);
+  const res  = await fetch(`${API}/quote/list?limit=1000&type=${type}`);
   if (!res.ok) throw new Error('HTTP ' + res.status);
   const json = await res.json();
   const stocks = (json.stocks || []).filter(s => s.stock);
-  cSet(key, stocks);
+  cSet('list_' + type, stocks);
   return stocks;
 }
 
-async function init() {
-  await switchType('stock');
-}
+async function init() { await switchType('stock'); }
 
 async function switchType(type) {
   currentType   = type;
   currentSector = 'Todos';
-  allStocks     = [];
-  filtered      = [];
-  page          = 0;
+  allStocks = []; filtered = []; page = 0;
+  grahamLoaded = false; grahamLoading = false; grahamData = {};
 
-  document.getElementById('grid-area').innerHTML =
+  const area = currentView === 'cards' ? 'grid-area' : 'graham-area';
+  document.getElementById(currentView === 'cards' ? 'grid-area' : 'graham-area').innerHTML =
     '<div class="state-box"><div class="spinner"></div>Carregando…</div>';
   document.getElementById('load-more-wrap').style.display = 'none';
+  hideGrahamPanels();
 
   try {
     allStocks = await loadList(type);
+    // Pre-warm Graham cache from localStorage
+    for (const s of allStocks) {
+      const c = cGet('fund_' + s.stock, GTTL);
+      if (c) grahamData[s.stock] = c;
+    }
     buildSectorChips();
     applyFilters();
-  } catch (e) {
+  } catch {
     document.getElementById('grid-area').innerHTML = `
       <div class="state-box" style="color:#ff8a9e">
         Erro ao carregar dados. Verifique a conexão.<br><br>
@@ -312,16 +389,24 @@ async function switchType(type) {
   }
 }
 
-/* ── Sectors ─────────────────────────────────── */
+/* ── View toggle ── */
+function setView(v) {
+  currentView = v;
+  document.getElementById('view-cards').classList.toggle('active', v === 'cards');
+  document.getElementById('view-graham').classList.toggle('active', v === 'graham');
+  document.getElementById('cards-outer').style.display   = v === 'cards'  ? '' : 'none';
+  document.getElementById('graham-outer').style.display  = v === 'graham' ? '' : 'none';
+  if (v === 'graham' && allStocks.length) startGraham();
+}
+
+/* ── Sectors ── */
 function buildSectorChips() {
   const raw = [...new Set(allStocks.map(s => s.sector).filter(Boolean))].sort();
-  const sectors = ['Todos', ...raw];
-  const container = document.getElementById('sector-chips');
-  container.innerHTML = sectors.map(s =>
-    `<span class="chip ${s === currentSector ? 'active' : ''}"
-           style="display:inline-block"
-           onclick="setSector(this,'${esc(s)}')">${s}</span>`
-  ).join('');
+  document.getElementById('sector-chips').innerHTML =
+    ['Todos', ...raw].map(s =>
+      `<span class="chip ${s===currentSector?'active':''}" style="display:inline-block"
+             onclick="setSector(this,'${esc(s)}')">${s}</span>`
+    ).join('');
 }
 
 function setType(el) {
@@ -330,92 +415,285 @@ function setType(el) {
   switchType(el.dataset.type);
 }
 
-function setSector(el, sector) {
+function setSector(el, s) {
   document.querySelectorAll('#sector-chips .chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
-  currentSector = sector;
-  page = 0;
+  currentSector = s; page = 0;
   applyFilters();
 }
 
-/* ── Filter ──────────────────────────────────── */
+function setMsFilter(el, f) {
+  document.querySelectorAll('.ms-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  msFilter = f;
+  renderGrahamTable();
+}
+
+/* ── Filters ── */
 function applyFilters() {
   const q = document.getElementById('search').value.toLowerCase().trim();
   filtered = allStocks.filter(s => {
-    if (currentSector !== 'Todos' && (s.sector || '') !== currentSector) return false;
+    if (currentSector !== 'Todos' && (s.sector||'') !== currentSector) return false;
     if (q && !s.stock.toLowerCase().includes(q) && !(s.name||'').toLowerCase().includes(q)) return false;
     return true;
   });
   page = 0;
-  renderPage(true);
+  if (currentView === 'cards') renderPage(true);
+  else renderGrahamTable();
+  document.getElementById('hcount').textContent = filtered.length + ' empresa' + (filtered.length!==1?'s':'');
 }
 
-/* ── Render ──────────────────────────────────── */
+/* ── Cards render ── */
 function renderPage(reset) {
-  const area = document.getElementById('grid-area');
-  const start = page * PAGE;
-  const slice = filtered.slice(start, start + PAGE);
-
-  document.getElementById('hcount').textContent =
-    filtered.length + ' empresa' + (filtered.length !== 1 ? 's' : '');
-
+  const area  = document.getElementById('grid-area');
+  const slice = filtered.slice(page * PAGE, (page + 1) * PAGE);
   if (!filtered.length) {
     area.innerHTML = '<div class="state-box">Nenhuma empresa encontrada.</div>';
     document.getElementById('load-more-wrap').style.display = 'none';
     return;
   }
-
-  if (reset) {
-    area.innerHTML = `<div class="grid">${slice.map(cardHTML).join('')}</div>`;
-  } else {
-    area.querySelector('.grid').insertAdjacentHTML('beforeend', slice.map(cardHTML).join(''));
-  }
-
+  if (reset) area.innerHTML = `<div class="grid">${slice.map(cardHTML).join('')}</div>`;
+  else area.querySelector('.grid').insertAdjacentHTML('beforeend', slice.map(cardHTML).join(''));
   page++;
-  const hasMore = page * PAGE < filtered.length;
-  document.getElementById('load-more-wrap').style.display = hasMore ? 'block' : 'none';
+  document.getElementById('load-more-wrap').style.display = page * PAGE < filtered.length ? 'block' : 'none';
 }
-
 function loadMore() { renderPage(false); }
 
 function cardHTML(s) {
   const chg = s.change ?? 0;
   const cls = chg > 0.001 ? 'up' : chg < -0.001 ? 'down' : 'flat';
   const sign = chg > 0 ? '+' : '';
-  const price = s.close != null ? fmtR(s.close) : '—';
   const logoEl = s.logo
-    ? `<img class="logo-img" src="${s.logo}" loading="lazy"
-            onerror="this.outerHTML='<div class=\\'logo-fb\\'>${esc2(s.stock.slice(0,4))}</div>'">`
+    ? `<img class="logo-img" src="${s.logo}" loading="lazy" onerror="this.outerHTML='<div class=\\'logo-fb\\'>${esc2(s.stock.slice(0,4))}</div>'">`
     : `<div class="logo-fb">${esc2(s.stock.slice(0,4))}</div>`;
-
   return `
     <div class="stock-card" onclick="openModal('${esc(s.stock)}')">
-      <div class="card-top">
-        ${logoEl}
-        <div class="card-info">
-          <div class="ticker">${s.stock}</div>
-          <div class="cname">${s.name || ''}</div>
-        </div>
-      </div>
-      <div class="card-price">${price}</div>
+      <div class="card-top">${logoEl}<div class="card-info"><div class="ticker">${s.stock}</div><div class="cname">${s.name||''}</div></div></div>
+      <div class="card-price">${s.close!=null?fmtR(s.close):'—'}</div>
       <div class="badge ${cls}">${sign}${chg.toFixed(2).replace('.',',')}%</div>
-      ${s.sector     ? `<div class="card-sector">${s.sector}</div>` : ''}
-      ${s.market_cap ? `<div class="card-mcap">Cap: ${fmtLarge(s.market_cap)}</div>` : ''}
+      ${s.sector?`<div class="card-sector">${s.sector}</div>`:''}
+      ${s.market_cap?`<div class="card-mcap">Cap: ${fmtLarge(s.market_cap)}</div>`:''}
     </div>`;
 }
 
-/* ── Modal ───────────────────────────────────── */
+/* ═══════════════════════════════════════════════
+   GRAHAM VIEW
+═══════════════════════════════════════════════ */
+async function startGraham() {
+  document.getElementById('graham-area').innerHTML = '';
+  if (grahamLoaded) { renderGrahamTable(); return; }
+  if (!grahamLoading) await loadGrahamData();
+}
+
+async function loadGrahamData() {
+  grahamLoading = true;
+  const tickers = allStocks.map(s => s.stock);
+
+  // Which ones still need fetching
+  const missing = tickers.filter(t => !(t in grahamData));
+  const batches = [];
+  for (let i = 0; i < missing.length; i += BATCH) batches.push(missing.slice(i, i + BATCH));
+
+  const prog = document.getElementById('graham-progress');
+  prog.style.display = batches.length ? 'block' : 'none';
+
+  for (let i = 0; i < batches.length; i++) {
+    const pct = Math.round((i / batches.length) * 100);
+    document.getElementById('prog-label').textContent =
+      `Buscando dados fundamentalistas… (${i * BATCH + batches[i].length} / ${missing.length})`;
+    document.getElementById('prog-pct').textContent = pct + '%';
+    document.getElementById('prog-bar').style.width  = pct + '%';
+
+    await fetchFundBatch(batches[i]);
+    if (i < batches.length - 1) await sleep(BATCH_DELAY);
+  }
+
+  document.getElementById('prog-bar').style.width = '100%';
+  document.getElementById('prog-pct').textContent = '100%';
+  await sleep(400);
+  prog.style.display = 'none';
+
+  grahamLoading = false;
+  grahamLoaded  = true;
+  renderGrahamTable();
+}
+
+async function fetchFundBatch(tickers) {
+  try {
+    const res  = await fetch(`${API}/quote/${tickers.join(',')}?fundamental=true`);
+    if (!res.ok) return;
+    const json = await res.json();
+    for (const item of (json.results || [])) {
+      if (item.symbol) {
+        grahamData[item.symbol] = item;
+        cSet('fund_' + item.symbol, item);
+      }
+    }
+  } catch {}
+}
+
+/* ── Graham formula ── */
+function calcGraham(ticker) {
+  const d = grahamData[ticker];
+  if (!d) return null;
+
+  const price = d.regularMarketPrice;
+  const lpa   = d.earningsPerShare;
+  const pvp   = d.priceToBook;
+  const pl    = d.priceEarnings;
+  const dy    = d.dividendYield;
+
+  if (!price || price <= 0) return null;
+
+  let vi = null, ms = null, vpa = null;
+  if (lpa > 0 && pvp > 0) {
+    vpa = price / pvp;
+    vi  = Math.sqrt(22.5 * lpa * vpa);
+    ms  = (vi - price) / vi * 100;
+  }
+
+  // 5 Graham criteria
+  const c1 = lpa != null && lpa > 0;
+  const c2 = pl  != null && pl > 0 && pl <= 15;
+  const c3 = pvp != null && pvp > 0 && pvp <= 1.5;
+  const c4 = pl  != null && pvp != null && pl > 0 && pvp > 0 && pl * pvp <= 22.5;
+  const c5 = ms  != null && ms >= 20;
+  const score = [c1,c2,c3,c4,c5].filter(Boolean).length;
+
+  return { price, lpa, vpa, pvp, pl, dy, vi, ms, score, c1, c2, c3, c4, c5 };
+}
+
+/* ── Render Graham table ── */
+function renderGrahamTable() {
+  document.getElementById('graham-area').innerHTML = '';
+
+  const rows = filtered.map(s => ({ ...s, g: calcGraham(s.stock) }));
+
+  // Apply MS filter
+  const shown = rows.filter(r => {
+    if (msFilter === 'under')  return r.g && r.g.ms != null && r.g.ms > 0;
+    if (msFilter === 'strong') return r.g && r.g.ms != null && r.g.ms >= 20;
+    return true;
+  });
+
+  // Sort
+  shown.sort((a, b) => {
+    const av = gSortVal(a), bv = gSortVal(b);
+    if (av == null && bv == null) return 0;
+    if (av == null) return 1;
+    if (bv == null) return -1;
+    if (typeof av === 'string') return av.localeCompare(bv) * gSort.dir;
+    return (av - bv) * gSort.dir;
+  });
+
+  // Summary (over full filtered, not just shown)
+  const withData = rows.filter(r => r.g && r.g.ms != null);
+  const under    = withData.filter(r => r.g.ms > 0).length;
+  const strong   = withData.filter(r => r.g.ms >= 20).length;
+  const avgMs    = withData.length ? withData.reduce((s,r) => s + r.g.ms, 0) / withData.length : null;
+
+  document.getElementById('gs-total').textContent  = withData.length;
+  document.getElementById('gs-under').textContent  = under;
+  document.getElementById('gs-strong').textContent = strong;
+  document.getElementById('gs-avg').textContent    =
+    avgMs != null ? (avgMs >= 0 ? '+' : '') + avgMs.toFixed(1).replace('.',',') + '%' : '—';
+
+  document.getElementById('graham-summary').style.display = 'flex';
+  document.getElementById('graham-filters').style.display = 'flex';
+
+  if (!shown.length) {
+    document.getElementById('gtable-wrap').style.display = 'none';
+    document.getElementById('graham-area').innerHTML = '<div class="state-box">Nenhuma empresa encontrada com os filtros atuais.</div>';
+    return;
+  }
+
+  document.getElementById('gtable-wrap').style.display = '';
+
+  // Update sort header highlight
+  document.querySelectorAll('.gtable thead th').forEach(th => th.classList.remove('sorted'));
+  const headers = ['rank','ticker','name','price','vi','ms','lpa','vpa','pl','pvp','score'];
+  const idx = headers.indexOf(gSort.col);
+  if (idx >= 0) {
+    const ths = document.querySelectorAll('.gtable thead th');
+    if (ths[idx]) {
+      ths[idx].classList.add('sorted');
+      const arr = ths[idx].querySelector('.sort-arr');
+      if (arr) arr.textContent = gSort.dir === -1 ? '↓' : '↑';
+    }
+  }
+
+  document.getElementById('gtbody').innerHTML = shown.map((r, i) => {
+    const g = r.g;
+    const noData = `<span class="na-text">—</span>`;
+    if (!g) {
+      return `<tr onclick="openModal('${esc(r.stock)}')">
+        <td class="rank-col">${i+1}</td>
+        <td class="ticker-col">${r.stock}</td>
+        <td class="name-col">${r.name||''}</td>
+        <td class="num">${r.close!=null?fmtR(r.close):noData}</td>
+        <td colspan="7" style="color:var(--muted);font-size:12px">Dados fundamentalistas não disponíveis</td>
+      </tr>`;
+    }
+
+    const msCls = g.ms == null ? 'ms-na' : g.ms >= 30 ? 'ms-strong' : g.ms >= 10 ? 'ms-good' : g.ms >= 0 ? 'ms-fair' : 'ms-over';
+    const msStr = g.ms != null ? (g.ms >= 0 ? '+' : '') + g.ms.toFixed(1).replace('.',',') + '%' : '—';
+    const dots  = [g.c1,g.c2,g.c3,g.c4,g.c5].map(v => `<div class="dot ${v?'on':'off'}"></div>`).join('');
+
+    return `<tr onclick="openModal('${esc(r.stock)}')">
+      <td class="rank-col">${i+1}</td>
+      <td class="ticker-col">${r.stock}</td>
+      <td class="name-col">${r.name||''}</td>
+      <td class="num">${fmtR(g.price)}</td>
+      <td class="num">${g.vi!=null ? fmtR(g.vi) : noData}</td>
+      <td><span class="badge ${msCls}">${msStr}</span></td>
+      <td class="num">${g.lpa!=null ? fmtR(g.lpa) : noData}</td>
+      <td class="num">${g.vpa!=null ? fmtR(g.vpa) : noData}</td>
+      <td class="num">${g.pl!=null  ? g.pl.toFixed(2).replace('.',',') : noData}</td>
+      <td class="num">${g.pvp!=null ? g.pvp.toFixed(2).replace('.',',') : noData}</td>
+      <td><div class="score-dots">${dots}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+function gSortVal(r) {
+  const g = r.g;
+  switch (gSort.col) {
+    case 'ticker': return r.stock;
+    case 'name':   return r.name || '';
+    case 'price':  return g?.price ?? null;
+    case 'vi':     return g?.vi    ?? null;
+    case 'ms':     return g?.ms    ?? null;
+    case 'lpa':    return g?.lpa   ?? null;
+    case 'vpa':    return g?.vpa   ?? null;
+    case 'pl':     return g?.pl    ?? null;
+    case 'pvp':    return g?.pvp   ?? null;
+    case 'score':  return g?.score ?? null;
+    default:       return null;
+  }
+}
+
+function sortGraham(col) {
+  if (gSort.col === col) gSort.dir *= -1;
+  else { gSort.col = col; gSort.dir = -1; }
+  renderGrahamTable();
+}
+
+function hideGrahamPanels() {
+  document.getElementById('graham-progress').style.display = 'none';
+  document.getElementById('graham-summary').style.display  = 'none';
+  document.getElementById('graham-filters').style.display  = 'none';
+  document.getElementById('gtable-wrap').style.display     = 'none';
+}
+
+/* ═══════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════ */
 async function openModal(ticker) {
-  const overlay = document.getElementById('overlay');
-  const head    = document.getElementById('modal-head');
-  const body    = document.getElementById('modal-body');
-
   const basic = allStocks.find(s => s.stock === ticker) || {};
-  head.innerHTML = headHTML(ticker, basic);
-  body.innerHTML = '<div class="state-box"><div class="spinner"></div></div>';
-  overlay.classList.add('open');
+  document.getElementById('modal-head').innerHTML = headHTML(ticker, basic);
+  document.getElementById('modal-body').innerHTML = '<div class="state-box"><div class="spinner"></div></div>';
+  document.getElementById('overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
-
   await fetchDetail(ticker, '1mo');
 }
 
@@ -423,39 +701,35 @@ function headHTML(ticker, basic) {
   const chg = basic.change ?? 0;
   const cls = chg > 0.001 ? 'up' : chg < -0.001 ? 'down' : 'flat';
   const logoEl = basic.logo
-    ? `<img class="modal-logo" src="${basic.logo}"
-            onerror="this.outerHTML='<div class=\\'modal-logo-fb\\'>${esc2(ticker.slice(0,4))}</div>'">`
+    ? `<img class="modal-logo" src="${basic.logo}" onerror="this.outerHTML='<div class=\\'modal-logo-fb\\'>${esc2(ticker.slice(0,4))}</div>'">`
     : `<div class="modal-logo-fb">${esc2(ticker.slice(0,4))}</div>`;
-
-  return `
-    ${logoEl}
+  return `${logoEl}
     <div class="modal-title">
       <div class="ticker">${ticker}</div>
-      <div class="cname">${basic.name || ''}</div>
+      <div class="cname">${basic.name||''}</div>
     </div>
     <div class="modal-price">
-      <div class="price">${basic.close != null ? fmtR(basic.close) : '—'}</div>
-      <div class="badge ${cls}">${chg >= 0 ? '+' : ''}${chg.toFixed(2).replace('.',',')}%</div>
+      <div class="price">${basic.close!=null?fmtR(basic.close):'—'}</div>
+      <div class="badge ${cls}">${chg>=0?'+':''}${chg.toFixed(2).replace('.',',')}%</div>
     </div>
     <button class="modal-close" onclick="closeModal()">✕</button>`;
 }
 
 async function fetchDetail(ticker, range) {
   const body = document.getElementById('modal-body');
-  const key  = `detail_${ticker}_${range}`;
-  let data = cGet(key);
+  const key  = 'detail_' + ticker + '_' + range;
+  let data = cGet(key, TTL);
 
   if (!data) {
     try {
-      const url = `${API}/quote/${ticker}?range=${range}&interval=1d&fundamental=true`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const res  = await fetch(`${API}/quote/${ticker}?range=${range}&interval=1d&fundamental=true`);
+      if (!res.ok) throw new Error();
       const json = await res.json();
       data = (json.results || [])[0];
-      if (data) cSet(key, data);
+      if (data) { cSet(key, data); grahamData[ticker] = data; cSet('fund_' + ticker, data); }
     } catch {
       body.innerHTML = `<div class="state-box" style="color:#ff8a9e">
-        Erro ao carregar dados de ${ticker}.<br><br>
+        Erro ao carregar dados.<br><br>
         <button class="btn" onclick="fetchDetail('${esc(ticker)}','${range}')">Tentar novamente</button>
       </div>`;
       return;
@@ -464,20 +738,16 @@ async function fetchDetail(ticker, range) {
 
   if (!data) { body.innerHTML = '<div class="state-box">Dados não disponíveis.</div>'; return; }
 
-  // Refresh header price
+  // Refresh header
   if (data.regularMarketPrice) {
-    const priceEl = document.querySelector('.modal-price .price');
-    if (priceEl) priceEl.textContent = fmtR(data.regularMarketPrice);
-    const chg = data.regularMarketChangePercent ?? 0;
-    const badgeEl = document.querySelector('.modal-price .badge');
-    if (badgeEl) {
-      badgeEl.textContent = (chg >= 0 ? '+' : '') + chg.toFixed(2).replace('.',',') + '%';
-      badgeEl.className = 'badge ' + (chg > 0.001 ? 'up' : chg < -0.001 ? 'down' : 'flat');
-    }
+    const pe = document.querySelector('.modal-price .price');
+    if (pe) pe.textContent = fmtR(data.regularMarketPrice);
+    const be = document.querySelector('.modal-price .badge');
+    const c  = data.regularMarketChangePercent ?? 0;
+    if (be) { be.textContent = (c>=0?'+':'') + c.toFixed(2).replace('.',',') + '%'; be.className = 'badge '+(c>0.001?'up':c<-0.001?'down':'flat'); }
   }
 
-  body.innerHTML = buildBody(data, ticker, range);
-
+  body.innerHTML = buildModalBody(data, ticker, range);
   document.querySelectorAll('.range-btn').forEach(btn => {
     btn.onclick = () => {
       document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
@@ -487,139 +757,194 @@ async function fetchDetail(ticker, range) {
   });
 }
 
-function buildBody(d, ticker, range) {
+function buildModalBody(d, ticker, range) {
+  const g = calcGraham(ticker);
   return `
     ${chartSection(d, range)}
+    ${grahamSection(g, d)}
     <p class="section-title">Indicadores de mercado</p>
     <div class="metrics">${metricsHTML(d)}</div>
-    ${extraHTML(d)}
-  `;
+    ${extraHTML(d)}`;
 }
 
-/* ── Chart ───────────────────────────────────── */
-function chartSection(d, range) {
-  const ranges = [
-    ['5d','5D'],['1mo','1M'],['3mo','3M'],['6mo','6M'],['1y','1A'],['2y','2A']
-  ];
-  const tabs = ranges.map(([r, lbl]) =>
-    `<button class="range-btn ${r===range?'active':''}" data-range="${r}">${lbl}</button>`
-  ).join('');
-
-  const prices = (d.historicalDataPrice || []).map(p => p.close).filter(v => v != null);
-  let svg = '';
-  if (prices.length >= 2) {
-    const W = 620, H = 110;
-    const mn = Math.min(...prices), mx = Math.max(...prices);
-    const pad = (mx - mn) * 0.08 || 1;
-    const lo = mn - pad, hi = mx + pad;
-    const xs = prices.map((_, i) => (i / (prices.length - 1)) * W);
-    const ys = prices.map(p => H - ((p - lo) / (hi - lo)) * H);
-    const line = xs.map((x, i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${ys[i].toFixed(1)}`).join('');
-    const area = line + `L${W},${H}L0,${H}Z`;
-    const isUp = prices.at(-1) >= prices[0];
-    const col  = isUp ? '#00d084' : '#ff4d6d';
-
-    // Price labels
-    const last = prices.at(-1);
-    const first = prices[0];
-    const lblDiff = ((last - first) / first * 100);
-    const lblSign = lblDiff >= 0 ? '+' : '';
-
-    svg = `
-      <svg class="sparkline" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
-        <defs>
-          <linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="${col}" stop-opacity="0.25"/>
-            <stop offset="100%" stop-color="${col}" stop-opacity="0"/>
-          </linearGradient>
-        </defs>
-        <path d="${area}" fill="url(#cg)"/>
-        <path d="${line}" fill="none" stroke="${col}" stroke-width="1.8" stroke-linejoin="round"/>
-      </svg>
-      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);padding:0 4px;margin-top:2px">
-        <span>${fmtR(first)}</span>
-        <span style="color:${isUp?'var(--green)':'var(--red)'}">
-          ${lblSign}${lblDiff.toFixed(2).replace('.',',')}%
-        </span>
-        <span>${fmtR(last)}</span>
-      </div>`;
-  } else {
-    svg = `<div style="text-align:center;color:var(--muted);font-size:12px;padding:20px 0">Histórico não disponível</div>`;
+/* ── Graham section inside modal ── */
+function grahamSection(g, d) {
+  if (!g) {
+    return `<div class="graham-card" style="margin-bottom:16px">
+      <div class="section-title" style="margin-bottom:8px">Análise Benjamin Graham</div>
+      <div style="font-size:13px;color:var(--muted)">
+        Dados insuficientes para calcular o valor intrínseco.
+        São necessários LPA positivo e P/VP positivo.
+      </div>
+    </div>`;
   }
 
-  return `
-    <div class="range-row" style="margin-bottom:8px">${tabs}</div>
-    <div class="chart-box">${svg}</div>`;
-}
+  const viStr = g.vi != null ? fmtR(g.vi) : '—';
+  const msAbs = g.ms != null ? Math.abs(g.ms) : 0;
+  const msCls = g.ms == null ? 'ms-na' : g.ms >= 30 ? 'ms-strong' : g.ms >= 10 ? 'ms-good' : g.ms >= 0 ? 'ms-fair' : 'ms-over';
+  const msColor = g.ms == null ? 'var(--muted)' : g.ms >= 30 ? '#00ff96' : g.ms >= 10 ? 'var(--green)' : g.ms >= 0 ? 'var(--yellow)' : 'var(--red)';
+  const msStr = g.ms != null ? (g.ms >= 0 ? '+' : '') + g.ms.toFixed(1).replace('.',',') + '%' : '—';
+  const statusLabel = g.ms == null ? 'Sem dados' : g.ms >= 30 ? 'Forte oportunidade' : g.ms >= 10 ? 'Subvalorizada' : g.ms >= 0 ? 'Levemente sub.' : g.ms >= -20 ? 'Sobrevalorizada' : 'Muito sobrevalorizada';
 
-/* ── Metrics ─────────────────────────────────── */
-function metricsHTML(d) {
-  const items = [
-    ['Preço atual',   d.regularMarketPrice          != null ? fmtR(d.regularMarketPrice)          : '—'],
-    ['Abertura',      d.regularMarketOpen            != null ? fmtR(d.regularMarketOpen)            : '—'],
-    ['Fech. anterior',d.regularMarketPreviousClose   != null ? fmtR(d.regularMarketPreviousClose)   : '—'],
-    ['Máx. do dia',   d.regularMarketDayHigh         != null ? fmtR(d.regularMarketDayHigh)         : '—'],
-    ['Mín. do dia',   d.regularMarketDayLow          != null ? fmtR(d.regularMarketDayLow)          : '—'],
-    ['Volume',        d.regularMarketVolume          != null ? fmtLarge(d.regularMarketVolume)      : '—'],
-    ['Market Cap',    d.marketCap                    != null ? fmtLarge(d.marketCap)                : '—'],
-    ['P/L',           d.priceEarnings                != null ? d.priceEarnings.toFixed(2).replace('.',',')  : '—'],
-    ['P/VP',          d.priceToBook                  != null ? d.priceToBook.toFixed(2).replace('.',',')    : '—'],
-    ['LPA',           d.earningsPerShare             != null ? fmtR(d.earningsPerShare)             : '—'],
-    ['Div. Yield',    d.dividendYield                != null ? d.dividendYield.toFixed(2).replace('.',',') + '%' : '—'],
-    ['Máx. 52 sem.',  d.fiftyTwoWeekHigh             != null ? fmtR(d.fiftyTwoWeekHigh)             : '—'],
-    ['Mín. 52 sem.',  d.fiftyTwoWeekLow              != null ? fmtR(d.fiftyTwoWeekLow)              : '—'],
-    ['Média 200d',    d.twoHundredDayAverage         != null ? fmtR(d.twoHundredDayAverage)         : '—'],
-    ['Média 50d',     d.fiftyDayAverage              != null ? fmtR(d.fiftyDayAverage)              : '—'],
-  ];
-  return items.map(([lbl, val]) => `
-    <div class="metric">
-      <div class="lbl">${lbl}</div>
-      <div class="val">${val}</div>
+  // Bar: clamp ms to [-100, 100] for display
+  const barPct = g.ms != null ? Math.min(Math.max((g.ms + 100) / 200 * 100, 0), 100) : 50;
+  const barCol = g.ms == null ? 'var(--muted)' : g.ms >= 0 ? 'var(--green)' : 'var(--red)';
+
+  // Score dots
+  const dots = [g.c1,g.c2,g.c3,g.c4,g.c5].map(v => `<div class="dot ${v?'on':'off'}" style="width:9px;height:9px"></div>`).join('');
+
+  const crit = [
+    [g.c1, `LPA positivo`, g.lpa!=null ? fmtR(g.lpa) : '—'],
+    [g.c2, `P/L ≤ 15`,     g.pl!=null  ? g.pl.toFixed(2).replace('.',',') : '—'],
+    [g.c3, `P/VP ≤ 1,5`,   g.pvp!=null ? g.pvp.toFixed(2).replace('.',',') : '—'],
+    [g.c4, `P/L × P/VP ≤ 22,5`, g.pl&&g.pvp ? (g.pl*g.pvp).toFixed(2).replace('.',',') : '—'],
+    [g.c5, `Margem ≥ 20%`, msStr],
+  ].map(([pass, label, val]) => `
+    <div class="criterion">
+      <div class="crit-icon ${pass?'pass':'fail'}">${pass?'✓':'✗'}</div>
+      <div class="crit-text">
+        <div>${label}</div>
+        <div class="crit-val">${val}</div>
+      </div>
     </div>`).join('');
-}
 
-/* ── Extra info ──────────────────────────────── */
-function extraHTML(d) {
-  const rows = [];
-  if (d.longName)     rows.push(['Nome completo', d.longName]);
-  if (d.currency)     rows.push(['Moeda',          d.currency]);
-  if (d.exchange)     rows.push(['Bolsa',           d.exchange]);
-  if (d.quoteType)    rows.push(['Tipo',            d.quoteType]);
-  if (d.sector)       rows.push(['Setor',           d.sector]);
-  if (d.industry)     rows.push(['Indústria',       d.industry]);
-  if (!rows.length)   return '';
   return `
-    <p class="section-title" style="margin-top:18px">Informações</p>
-    <div class="extra-box">
-      ${rows.map(([k, v]) => `<div class="extra-row"><span class="k">${k}</span><span>${v}</span></div>`).join('')}
+    <div class="graham-card">
+      <div class="section-title" style="margin-bottom:12px">Análise Benjamin Graham</div>
+      <div class="graham-card-head">
+        <div>
+          <div class="sec-title">Valor Intrínseco</div>
+          <div class="vi-main">${viStr}</div>
+          <div class="vi-formula">V* = √(22,5 × LPA × VPA)</div>
+        </div>
+        <div class="ms-display">
+          <div class="ms-label">Margem de Segurança</div>
+          <div class="ms-pct" style="color:${msColor}">${msStr}</div>
+          <div class="badge ${msCls}" style="margin-top:4px">${statusLabel}</div>
+        </div>
+      </div>
+
+      <div class="ms-bar-wrap">
+        <div class="ms-bar-bg">
+          <div class="ms-bar-fg" style="width:${barPct}%;background:${barCol}"></div>
+        </div>
+        <div class="ms-bar-labels">
+          <span>Muito sobrevalorizada</span>
+          <span>Justa</span>
+          <span>Forte desconto</span>
+        </div>
+      </div>
+
+      <div style="margin-bottom:10px;display:flex;align-items:center;gap:10px">
+        <span style="font-size:12px;color:var(--muted)">Score Graham</span>
+        <div class="score-dots">${dots}</div>
+        <span style="font-size:12px;color:var(--accent)">${g.score}/5</span>
+      </div>
+
+      <div class="criteria-grid">${crit}</div>
+
+      ${g.vi != null ? `
+      <div style="margin-top:12px;padding:10px 12px;background:var(--bg);border-radius:8px;font-size:11px;color:var(--muted);line-height:1.7">
+        LPA = ${fmtR(g.lpa)} &nbsp;|&nbsp;
+        VPA = ${fmtR(g.vpa)} &nbsp;|&nbsp;
+        V* = √(22,5 × ${g.lpa.toFixed(2)} × ${g.vpa.toFixed(2)}) = <strong style="color:var(--text)">${fmtR(g.vi)}</strong>
+      </div>` : ''}
     </div>`;
 }
 
-/* ── Modal close ─────────────────────────────── */
-function handleOverlayClick(e) {
-  if (e.target === document.getElementById('overlay')) closeModal();
-}
-function closeModal() {
-  document.getElementById('overlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+/* ── Chart ── */
+function chartSection(d, range) {
+  const ranges = [['5d','5D'],['1mo','1M'],['3mo','3M'],['6mo','6M'],['1y','1A'],['2y','2A']];
+  const tabs = ranges.map(([r,l]) =>
+    `<button class="range-btn ${r===range?'active':''}" data-range="${r}">${l}</button>`
+  ).join('');
 
-/* ── Formatting ──────────────────────────────── */
-function fmtR(v) {
-  return 'R$ ' + v.toFixed(2).replace('.', ',');
+  const prices = (d.historicalDataPrice||[]).map(p=>p.close).filter(v=>v!=null);
+  let body = '';
+  if (prices.length >= 2) {
+    const W=620,H=100, mn=Math.min(...prices), mx=Math.max(...prices);
+    const pad=(mx-mn)*0.08||1, lo=mn-pad, hi=mx+pad;
+    const xs=prices.map((_,i)=>(i/(prices.length-1))*W);
+    const ys=prices.map(p=>H-((p-lo)/(hi-lo))*H);
+    const line=xs.map((x,i)=>`${i?'L':'M'}${x.toFixed(1)},${ys[i].toFixed(1)}`).join('');
+    const area=line+`L${W},${H}L0,${H}Z`;
+    const isUp=prices.at(-1)>=prices[0], col=isUp?'#00d084':'#ff4d6d';
+    const diff=((prices.at(-1)-prices[0])/prices[0]*100);
+    body=`<svg class="sparkline" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+      <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${col}" stop-opacity="0.25"/>
+        <stop offset="100%" stop-color="${col}" stop-opacity="0"/>
+      </linearGradient></defs>
+      <path d="${area}" fill="url(#cg)"/>
+      <path d="${line}" fill="none" stroke="${col}" stroke-width="1.8" stroke-linejoin="round"/>
+    </svg>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);padding:0 3px;margin-top:2px">
+      <span>${fmtR(prices[0])}</span>
+      <span style="color:${isUp?'var(--green)':'var(--red)'}">${diff>=0?'+':''}${diff.toFixed(2).replace('.',',')}%</span>
+      <span>${fmtR(prices.at(-1))}</span>
+    </div>`;
+  } else {
+    body = `<div style="text-align:center;color:var(--muted);font-size:12px;padding:18px 0">Histórico não disponível</div>`;
+  }
+  return `<div class="range-row">${tabs}</div><div class="chart-box">${body}</div>`;
 }
+
+/* ── Metrics ── */
+function metricsHTML(d) {
+  return [
+    ['Preço atual',    d.regularMarketPrice        != null ? fmtR(d.regularMarketPrice)        : '—'],
+    ['Abertura',       d.regularMarketOpen          != null ? fmtR(d.regularMarketOpen)          : '—'],
+    ['Fech. anterior', d.regularMarketPreviousClose != null ? fmtR(d.regularMarketPreviousClose) : '—'],
+    ['Máx. do dia',    d.regularMarketDayHigh       != null ? fmtR(d.regularMarketDayHigh)       : '—'],
+    ['Mín. do dia',    d.regularMarketDayLow        != null ? fmtR(d.regularMarketDayLow)        : '—'],
+    ['Volume',         d.regularMarketVolume        != null ? fmtLarge(d.regularMarketVolume)    : '—'],
+    ['Market Cap',     d.marketCap                  != null ? fmtLarge(d.marketCap)              : '—'],
+    ['P/L',            d.priceEarnings              != null ? d.priceEarnings.toFixed(2).replace('.',',')  : '—'],
+    ['P/VP',           d.priceToBook                != null ? d.priceToBook.toFixed(2).replace('.',',')    : '—'],
+    ['LPA',            d.earningsPerShare           != null ? fmtR(d.earningsPerShare)           : '—'],
+    ['Div. Yield',     d.dividendYield              != null ? d.dividendYield.toFixed(2).replace('.',',')+'%' : '—'],
+    ['Máx. 52 sem.',   d.fiftyTwoWeekHigh           != null ? fmtR(d.fiftyTwoWeekHigh)           : '—'],
+    ['Mín. 52 sem.',   d.fiftyTwoWeekLow            != null ? fmtR(d.fiftyTwoWeekLow)            : '—'],
+    ['Média 200d',     d.twoHundredDayAverage       != null ? fmtR(d.twoHundredDayAverage)       : '—'],
+    ['Média 50d',      d.fiftyDayAverage            != null ? fmtR(d.fiftyDayAverage)            : '—'],
+  ].map(([lbl,val]) => `<div class="metric"><div class="lbl">${lbl}</div><div class="val">${val}</div></div>`).join('');
+}
+
+/* ── Extra info ── */
+function extraHTML(d) {
+  const rows = [];
+  if (d.longName)  rows.push(['Nome completo', d.longName]);
+  if (d.currency)  rows.push(['Moeda',         d.currency]);
+  if (d.exchange)  rows.push(['Bolsa',          d.exchange]);
+  if (d.quoteType) rows.push(['Tipo',           d.quoteType]);
+  if (d.sector)    rows.push(['Setor',          d.sector]);
+  if (d.industry)  rows.push(['Indústria',      d.industry]);
+  if (!rows.length) return '';
+  return `<p class="section-title" style="margin-top:16px">Informações</p>
+    <div class="extra-box">
+      ${rows.map(([k,v])=>`<div class="extra-row"><span class="k">${k}</span><span>${v}</span></div>`).join('')}
+    </div>`;
+}
+
+/* ── Modal close ── */
+function handleOverlayClick(e) { if (e.target===document.getElementById('overlay')) closeModal(); }
+function closeModal() { document.getElementById('overlay').classList.remove('open'); document.body.style.overflow=''; }
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
+
+/* ── Utils ── */
+function fmtR(v) { return 'R$ ' + v.toFixed(2).replace('.', ','); }
 function fmtLarge(n) {
-  if (n >= 1e12) return 'R$ ' + (n / 1e12).toFixed(2).replace('.', ',') + ' T';
-  if (n >= 1e9)  return 'R$ ' + (n / 1e9 ).toFixed(2).replace('.', ',') + ' B';
-  if (n >= 1e6)  return 'R$ ' + (n / 1e6 ).toFixed(2).replace('.', ',') + ' M';
-  if (n >= 1e3)  return 'R$ ' + (n / 1e3 ).toFixed(2).replace('.', ',') + ' K';
-  return 'R$ ' + n.toFixed(0);
+  if (n >= 1e12) return 'R$ ' + (n/1e12).toFixed(2).replace('.',',') + ' T';
+  if (n >= 1e9)  return 'R$ ' + (n/1e9 ).toFixed(2).replace('.',',') + ' B';
+  if (n >= 1e6)  return 'R$ ' + (n/1e6 ).toFixed(2).replace('.',',') + ' M';
+  if (n >= 1e3)  return 'R$ ' + (n/1e3 ).toFixed(2).replace('.',',') + ' K';
+  return 'R$ ' + n.toFixed(0);
 }
-function esc(s)  { return String(s).replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+function esc(s)  { return String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
 function esc2(s) { return String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-/* ── Boot ────────────────────────────────────── */
+/* ── Boot ── */
 init();
 </script>
 </body>
