@@ -44,9 +44,34 @@
     .view-btn.active { background: var(--accent); color: #fff; }
     .view-btn:not(.active):hover { background: var(--card2); color: var(--text); }
 
+    .icon-btn { background: none; border: 1px solid var(--border); color: var(--muted); cursor: pointer; padding: 7px 10px; border-radius: 8px; font-size: 14px; transition: all 0.15s; flex-shrink: 0; }
+    .icon-btn:hover { color: var(--text); border-color: var(--muted); background: var(--card2); }
     .header-count { color: var(--muted); font-size: 12px; white-space: nowrap; margin-left: auto; }
     .back-link { color: var(--muted); font-size: 12px; text-decoration: none; padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; transition: all 0.15s; flex-shrink: 0; }
     .back-link:hover { color: var(--text); border-color: var(--muted); }
+
+    /* ── Settings panel ── */
+    #settings-panel {
+      display: none; background: var(--header); border-bottom: 2px solid var(--accent);
+      padding: 14px 24px; gap: 16px; flex-wrap: wrap; align-items: flex-end;
+    }
+    #settings-panel.open { display: flex; }
+    .setting-group { display: flex; flex-direction: column; gap: 5px; min-width: 180px; }
+    .setting-group label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .setting-group input {
+      padding: 7px 10px; background: var(--card2); border: 1px solid var(--border);
+      border-radius: 7px; color: var(--text); font-size: 13px; outline: none; transition: border-color 0.15s;
+    }
+    .setting-group input:focus { border-color: var(--accent); }
+    .setting-hint { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .settings-save { padding: 8px 18px; background: var(--accent); border: none; border-radius: 7px; color: #fff; cursor: pointer; font-size: 13px; font-weight: 600; align-self: flex-end; }
+    .settings-save:hover { opacity: 0.88; }
+    .formula-box {
+      background: var(--card2); border-radius: 8px; padding: 10px 14px;
+      font-size: 12px; color: var(--muted); line-height: 1.6; max-width: 340px;
+      border-left: 3px solid var(--accent);
+    }
+    .formula-box strong { color: var(--text); }
 
     /* ── Filter bar ── */
     .filter-bar {
@@ -63,9 +88,9 @@
     .chip:hover { color: var(--text); border-color: var(--muted); }
     .chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
     .chip.type-chip.active { background: #6b4fcc; border-color: #6b4fcc; }
-    .chip.ms-chip.active { background: #1a7a4a; border-color: #00d084; color: var(--green); }
+    .chip.ms-chip.active { background: #1a4a3a; border-color: var(--green); color: var(--green); }
 
-    /* ── Shared state / loading ── */
+    /* ── State / Loading ── */
     .state-box { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 14px; }
     .spinner { width: 36px; height: 36px; margin: 0 auto 14px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.75s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -77,10 +102,7 @@
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
     .load-more-wrap { text-align: center; padding: 22px 0 30px; }
 
-    .stock-card {
-      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-      padding: 15px; cursor: pointer; transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
-    }
+    .stock-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 15px; cursor: pointer; transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s; }
     .stock-card:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: 0 4px 20px rgba(79,142,247,0.1); }
     .card-top { display: flex; align-items: center; gap: 10px; margin-bottom: 11px; }
     .logo-img { width: 32px; height: 32px; border-radius: 7px; object-fit: contain; background: #fff; padding: 3px; flex-shrink: 0; }
@@ -98,24 +120,25 @@
     /* ── Graham view ── */
     #graham-outer { padding: 18px 24px 40px; }
 
-    .graham-progress { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; }
-    .progress-top { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 10px; }
+    .graham-progress { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin-bottom: 16px; }
+    .progress-top { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+    .progress-top span:last-child { color: var(--accent); font-weight: 600; }
     .progress-bar-bg { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
-    .progress-bar-fg { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.4s; }
+    .progress-bar-fg { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.3s; }
 
-    .graham-summary { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
-    .gsum { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; flex: 1; min-width: 120px; }
+    .graham-summary { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+    .gsum { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; flex: 1; min-width: 110px; }
     .gsum .gl { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    .gsum .gv { font-size: 18px; font-weight: 700; margin-top: 4px; }
+    .gsum .gv { font-size: 20px; font-weight: 700; margin-top: 4px; }
 
     .graham-filters { display: flex; gap: 6px; margin-bottom: 14px; }
 
     .gtable-wrap { overflow-x: auto; }
-    .gtable { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 780px; }
+    .gtable { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 760px; }
     .gtable thead th {
-      padding: 9px 12px; text-align: left; font-size: 11px; font-weight: 600;
-      color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px;
-      border-bottom: 2px solid var(--border); cursor: pointer; user-select: none; white-space: nowrap;
+      padding: 9px 12px; text-align: left; font-size: 11px; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--border);
+      cursor: pointer; user-select: none; white-space: nowrap;
       position: sticky; top: 0; background: var(--bg); z-index: 1;
     }
     .gtable thead th:hover { color: var(--text); }
@@ -125,11 +148,10 @@
     .gtable tbody tr { transition: background 0.1s; cursor: pointer; }
     .gtable tbody tr:hover td { background: rgba(79,142,247,0.05); }
     .gtable td { padding: 11px 12px; border-bottom: 1px solid rgba(37,37,64,0.6); vertical-align: middle; }
-    .gtable .rank-col { color: var(--muted); font-size: 12px; width: 36px; }
-    .gtable .ticker-col { font-weight: 700; font-size: 13px; }
-    .gtable .name-col { color: var(--muted); font-size: 12px; max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .gtable .num { font-size: 13px; }
-    .gtable .na-text { color: var(--muted); font-size: 12px; }
+    .rank-col { color: var(--muted); font-size: 12px; width: 36px; }
+    .ticker-col { font-weight: 700; font-size: 13px; }
+    .name-col { color: var(--muted); font-size: 12px; max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .na-text { color: var(--muted); font-size: 12px; }
 
     .ms-strong { background: rgba(0,255,150,0.12); color: #00ff96; }
     .ms-good   { background: rgba(0,208,132,0.12); color: var(--green); }
@@ -142,12 +164,13 @@
     .dot.on  { background: var(--accent); }
     .dot.off { background: var(--border); }
 
+    .loading-row td { color: var(--muted); font-size: 12px; text-align: center; padding: 14px; }
+
     /* ── Modal ── */
     .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 16px; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
     .overlay.open { opacity: 1; pointer-events: all; }
     .modal { background: var(--card); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 660px; max-height: 92vh; overflow-y: auto; transform: translateY(18px); transition: transform 0.22s; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
     .overlay.open .modal { transform: translateY(0); }
-
     .modal-head { display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--card); z-index: 1; }
     .modal-logo { width: 44px; height: 44px; border-radius: 10px; object-fit: contain; background: #fff; padding: 4px; flex-shrink: 0; }
     .modal-logo-fb { width: 44px; height: 44px; border-radius: 10px; flex-shrink: 0; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: #fff; }
@@ -159,36 +182,28 @@
     .modal-close:hover { color: var(--text); border-color: var(--muted); }
     .modal-body { padding: 18px 20px 26px; }
 
-    /* Range tabs */
     .range-row { display: flex; gap: 5px; margin-bottom: 8px; }
     .range-btn { padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); background: none; color: var(--muted); transition: all 0.15s; }
     .range-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
     .range-btn:hover:not(.active) { border-color: var(--muted); color: var(--text); }
 
-    /* Chart */
     .chart-box { background: var(--card2); border-radius: 10px; padding: 8px 8px 4px; margin-bottom: 16px; }
     svg.sparkline { width: 100%; height: 110px; display: block; }
 
-    /* Graham modal card */
-    .graham-card {
-      background: var(--card2); border: 1px solid var(--border); border-radius: 12px;
-      padding: 16px; margin-bottom: 16px;
-    }
-    .graham-card-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; }
-    .graham-card-head .sec-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+    .graham-card { background: var(--card2); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+    .graham-card-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+    .sec-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 5px; }
     .vi-main { font-size: 26px; font-weight: 700; }
-    .vi-formula { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .vi-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
     .ms-display { text-align: right; }
     .ms-pct { font-size: 26px; font-weight: 700; }
-    .ms-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+    .ms-lbl { font-size: 11px; color: var(--muted); margin-bottom: 3px; }
 
-    /* MS bar */
     .ms-bar-wrap { margin-bottom: 14px; }
-    .ms-bar-bg { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; position: relative; }
-    .ms-bar-fg { height: 100%; border-radius: 4px; transition: width 0.4s; }
+    .ms-bar-bg { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .ms-bar-fg { height: 100%; border-radius: 4px; transition: width 0.5s; }
     .ms-bar-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); margin-top: 3px; }
 
-    /* Criteria */
     .criteria-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
     .criterion { display: flex; align-items: center; gap: 8px; font-size: 12px; background: var(--bg); border-radius: 7px; padding: 8px 10px; }
     .crit-icon { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
@@ -197,14 +212,14 @@
     .crit-text { line-height: 1.3; }
     .crit-val { color: var(--muted); font-size: 11px; }
 
-    /* Metrics grid */
+    .calc-breakdown { margin-top: 12px; padding: 10px 12px; background: var(--bg); border-radius: 8px; font-size: 11px; color: var(--muted); line-height: 1.8; }
+
     .section-title { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px; }
     .metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
     .metric { background: var(--card2); border-radius: 8px; padding: 11px 12px; }
     .metric .lbl { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
     .metric .val { font-size: 14px; font-weight: 600; margin-top: 4px; }
 
-    /* Extra info */
     .extra-box { background: var(--card2); border-radius: 10px; padding: 12px 14px; }
     .extra-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(37,37,64,0.6); font-size: 12px; }
     .extra-row:last-child { border-bottom: none; padding-bottom: 0; }
@@ -232,9 +247,35 @@
     <button class="view-btn active" id="view-cards" onclick="setView('cards')">Cards</button>
     <button class="view-btn" id="view-graham" onclick="setView('graham')">Graham</button>
   </div>
+  <button class="icon-btn" title="Configurações Graham" onclick="toggleSettings()">⚙</button>
   <a class="back-link" href="index.html">← Dashboard</a>
   <span class="header-count" id="hcount"></span>
 </header>
+
+<!-- Settings panel -->
+<div id="settings-panel">
+  <div class="setting-group">
+    <label>Taxa de Crescimento (g)</label>
+    <input id="cfg-g" type="number" min="0" max="30" step="0.5" placeholder="5">
+    <div class="setting-hint">% ao ano esperada — padrão: 5%</div>
+  </div>
+  <div class="setting-group">
+    <label>Taxa Selic / Livre de Risco (Y)</label>
+    <input id="cfg-y" type="number" min="1" max="30" step="0.25" placeholder="10.5">
+    <div class="setting-hint">% — padrão: 10,5% (Selic atual)</div>
+  </div>
+  <div class="setting-group" style="min-width:260px">
+    <label>Token brapi.dev <span style="font-weight:400;text-transform:none">(opcional)</span></label>
+    <input id="cfg-token" type="text" placeholder="Cole seu token aqui…">
+    <div class="setting-hint">Token gratuito em brapi.dev → mais dados e sem throttling</div>
+  </div>
+  <button class="settings-save" onclick="saveSettings()">Salvar e recarregar</button>
+  <div class="formula-box">
+    <strong>Fórmula de Graham:</strong><br>
+    V* = LPA × (8,5 + 2g) × 4,4 / Y<br>
+    <span style="font-size:11px">Margem de Segurança = (V* − Preço) / V* × 100</span>
+  </div>
+</div>
 
 <div class="filter-bar">
   <div class="chip type-chip active" data-type="stock" onclick="setType(this)">Ações</div>
@@ -261,50 +302,46 @@
   <div id="graham-progress" style="display:none" class="graham-progress">
     <div class="progress-top">
       <span id="prog-label">Buscando dados fundamentalistas…</span>
-      <span id="prog-pct" style="color:var(--accent)">0%</span>
+      <span id="prog-pct">0%</span>
     </div>
     <div class="progress-bar-bg"><div class="progress-bar-fg" id="prog-bar" style="width:0%"></div></div>
   </div>
-
   <div id="graham-summary" class="graham-summary" style="display:none">
-    <div class="gsum"><div class="gl">Analisadas</div><div class="gv" id="gs-total">—</div></div>
+    <div class="gsum"><div class="gl">Com dados</div><div class="gv" id="gs-total">—</div></div>
     <div class="gsum"><div class="gl">Subvalorizadas</div><div class="gv" style="color:var(--green)" id="gs-under">—</div></div>
     <div class="gsum"><div class="gl">MS &gt; 20%</div><div class="gv" style="color:#00ff96" id="gs-strong">—</div></div>
     <div class="gsum"><div class="gl">Média MS</div><div class="gv" id="gs-avg">—</div></div>
   </div>
-
   <div class="graham-filters" id="graham-filters" style="display:none">
-    <span class="chip ms-chip active" data-mf="all"   onclick="setMsFilter(this,'all')">Todas</span>
-    <span class="chip ms-chip" data-mf="under" onclick="setMsFilter(this,'under')">Subvalorizadas (MS &gt; 0)</span>
-    <span class="chip ms-chip" data-mf="strong" onclick="setMsFilter(this,'strong')">Forte oportunidade (MS &gt; 20%)</span>
+    <span class="chip ms-chip active" onclick="setMsFilter(this,'all')">Todas</span>
+    <span class="chip ms-chip" onclick="setMsFilter(this,'under')">Subvalorizadas (MS &gt; 0%)</span>
+    <span class="chip ms-chip" onclick="setMsFilter(this,'strong')">Forte oportunidade (MS &gt; 20%)</span>
   </div>
-
   <div class="gtable-wrap" id="gtable-wrap" style="display:none">
-    <table class="gtable" id="gtable">
+    <table class="gtable">
       <thead>
         <tr>
           <th class="rank-col">#</th>
           <th onclick="sortGraham('ticker')">Ticker <span class="sort-arr">↕</span></th>
           <th onclick="sortGraham('name')">Nome <span class="sort-arr">↕</span></th>
           <th onclick="sortGraham('price')">Preço <span class="sort-arr">↕</span></th>
-          <th onclick="sortGraham('vi')" class="sorted">V. Intrínseco <span class="sort-arr">↓</span></th>
-          <th onclick="sortGraham('ms')">Margem Seg. <span class="sort-arr">↕</span></th>
+          <th onclick="sortGraham('vi')">V. Intrínseco <span class="sort-arr">↕</span></th>
+          <th onclick="sortGraham('ms')" id="th-ms" class="sorted">Margem Seg. <span class="sort-arr">↓</span></th>
           <th onclick="sortGraham('lpa')">LPA <span class="sort-arr">↕</span></th>
-          <th onclick="sortGraham('vpa')">VPA <span class="sort-arr">↕</span></th>
           <th onclick="sortGraham('pl')">P/L <span class="sort-arr">↕</span></th>
-          <th onclick="sortGraham('pvp')">P/VP <span class="sort-arr">↕</span></th>
+          <th onclick="sortGraham('dy')">Div. Yield <span class="sort-arr">↕</span></th>
           <th onclick="sortGraham('score')">Score <span class="sort-arr">↕</span></th>
         </tr>
       </thead>
       <tbody id="gtbody"></tbody>
     </table>
   </div>
-  <div id="graham-area"></div>
+  <div id="graham-msg"></div>
 </div>
 
 <!-- Modal -->
 <div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
-  <div class="modal" id="modal">
+  <div class="modal">
     <div class="modal-head" id="modal-head"></div>
     <div class="modal-body" id="modal-body">
       <div class="state-box"><div class="spinner"></div></div>
@@ -314,23 +351,54 @@
 
 <script>
 const API  = 'https://brapi.dev/api';
-const TTL  = 30 * 60 * 1000;       // 30 min for list/prices
-const GTTL = 8 * 60 * 60 * 1000;   // 8 h for fundamentals
+const TTL  = 30 * 60 * 1000;       // 30 min
+const GTTL = 8  * 60 * 60 * 1000;  // 8 h for fundamentals
 const PAGE = 40;
-const BATCH = 15;                   // tickers per fundamental request
-const BATCH_DELAY = 400;            // ms between batches (rate limit)
+const BATCH = 15;
+const BATCH_DELAY = 1000;           // 1 s between batches (avoids 429)
 
-let allStocks     = [];
-let filtered      = [];
-let page          = 0;
-let currentType   = 'stock';
-let currentSector = 'Todos';
-let currentView   = 'cards';
-let msFilter      = 'all';
-let grahamData    = {};             // ticker -> fundamental object
-let grahamLoading = false;
-let grahamLoaded  = false;
-let gSort         = { col: 'ms', dir: -1 };
+let allStocks    = [];
+let filtered     = [];
+let page         = 0;
+let currentType  = 'stock';
+let currentSector= 'Todos';
+let currentView  = 'cards';
+let msFilter     = 'all';
+let grahamData   = {};
+let grahamLoading= false;
+let grahamLoaded = false;
+let gSort        = { col: 'ms', dir: -1 };
+
+/* ── Settings ── */
+function getSettings() {
+  try {
+    const s = JSON.parse(localStorage.getItem('b3app_cfg') || '{}');
+    return { token: s.token || '', g: s.g ?? 5, y: s.y ?? 10.5 };
+  } catch { return { token: '', g: 5, y: 10.5 }; }
+}
+function toggleSettings() {
+  const p = document.getElementById('settings-panel');
+  const open = p.classList.toggle('open');
+  if (open) {
+    const s = getSettings();
+    document.getElementById('cfg-g').value     = s.g;
+    document.getElementById('cfg-y').value     = s.y;
+    document.getElementById('cfg-token').value = s.token;
+  }
+}
+function saveSettings() {
+  const s = {
+    g:     parseFloat(document.getElementById('cfg-g').value)     || 5,
+    y:     parseFloat(document.getElementById('cfg-y').value)     || 10.5,
+    token: document.getElementById('cfg-token').value.trim(),
+  };
+  localStorage.setItem('b3app_cfg', JSON.stringify(s));
+  document.getElementById('settings-panel').classList.remove('open');
+  // Reset Graham cache so it re-fetches with new token if set
+  grahamLoaded = false; grahamLoading = false; grahamData = {};
+  if (currentView === 'graham') startGraham();
+  else renderGrahamTable();
+}
 
 /* ── Cache ── */
 function cGet(k, ttl) {
@@ -345,11 +413,22 @@ function cSet(k, d) {
   try { localStorage.setItem('b3app_' + k, JSON.stringify({d, t: Date.now()})); } catch {}
 }
 
-/* ── List API ── */
+/* ── API URL builder (injects token) ── */
+function apiUrl(path, extra) {
+  const { token } = getSettings();
+  let url = API + path;
+  const params = [];
+  if (extra) params.push(extra);
+  if (token) params.push('token=' + encodeURIComponent(token));
+  if (params.length) url += '?' + params.join('&');
+  return url;
+}
+
+/* ── List ── */
 async function loadList(type) {
   const cached = cGet('list_' + type, TTL);
   if (cached) return cached;
-  const res  = await fetch(`${API}/quote/list?limit=1000&type=${type}`);
+  const res  = await fetch(apiUrl('/quote/list', 'limit=1000&type=' + type));
   if (!res.ok) throw new Error('HTTP ' + res.status);
   const json = await res.json();
   const stocks = (json.stocks || []).filter(s => s.stock);
@@ -360,20 +439,22 @@ async function loadList(type) {
 async function init() { await switchType('stock'); }
 
 async function switchType(type) {
-  currentType   = type;
-  currentSector = 'Todos';
+  currentType = type; currentSector = 'Todos';
   allStocks = []; filtered = []; page = 0;
   grahamLoaded = false; grahamLoading = false; grahamData = {};
 
-  const area = currentView === 'cards' ? 'grid-area' : 'graham-area';
-  document.getElementById(currentView === 'cards' ? 'grid-area' : 'graham-area').innerHTML =
+  document.getElementById('grid-area').innerHTML =
     '<div class="state-box"><div class="spinner"></div>Carregando…</div>';
   document.getElementById('load-more-wrap').style.display = 'none';
-  hideGrahamPanels();
+  document.getElementById('graham-progress').style.display = 'none';
+  document.getElementById('graham-summary').style.display  = 'none';
+  document.getElementById('graham-filters').style.display  = 'none';
+  document.getElementById('gtable-wrap').style.display     = 'none';
+  document.getElementById('graham-msg').textContent        = '';
 
   try {
     allStocks = await loadList(type);
-    // Pre-warm Graham cache from localStorage
+    // Pre-warm from localStorage cache
     for (const s of allStocks) {
       const c = cGet('fund_' + s.stock, GTTL);
       if (c) grahamData[s.stock] = c;
@@ -389,17 +470,17 @@ async function switchType(type) {
   }
 }
 
-/* ── View toggle ── */
+/* ── Views ── */
 function setView(v) {
   currentView = v;
   document.getElementById('view-cards').classList.toggle('active', v === 'cards');
   document.getElementById('view-graham').classList.toggle('active', v === 'graham');
-  document.getElementById('cards-outer').style.display   = v === 'cards'  ? '' : 'none';
-  document.getElementById('graham-outer').style.display  = v === 'graham' ? '' : 'none';
+  document.getElementById('cards-outer').style.display  = v === 'cards'  ? '' : 'none';
+  document.getElementById('graham-outer').style.display = v === 'graham' ? '' : 'none';
   if (v === 'graham' && allStocks.length) startGraham();
 }
 
-/* ── Sectors ── */
+/* ── Sectors / filters ── */
 function buildSectorChips() {
   const raw = [...new Set(allStocks.map(s => s.sector).filter(Boolean))].sort();
   document.getElementById('sector-chips').innerHTML =
@@ -408,28 +489,22 @@ function buildSectorChips() {
              onclick="setSector(this,'${esc(s)}')">${s}</span>`
     ).join('');
 }
-
 function setType(el) {
   document.querySelectorAll('.type-chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
   switchType(el.dataset.type);
 }
-
 function setSector(el, s) {
   document.querySelectorAll('#sector-chips .chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
-  currentSector = s; page = 0;
-  applyFilters();
+  currentSector = s; page = 0; applyFilters();
 }
-
 function setMsFilter(el, f) {
   document.querySelectorAll('.ms-chip').forEach(c => c.classList.remove('active'));
   el.classList.add('active');
-  msFilter = f;
-  renderGrahamTable();
+  msFilter = f; renderGrahamTable();
 }
 
-/* ── Filters ── */
 function applyFilters() {
   const q = document.getElementById('search').value.toLowerCase().trim();
   filtered = allStocks.filter(s => {
@@ -438,12 +513,13 @@ function applyFilters() {
     return true;
   });
   page = 0;
+  document.getElementById('hcount').textContent =
+    filtered.length + ' empresa' + (filtered.length !== 1 ? 's' : '');
   if (currentView === 'cards') renderPage(true);
   else renderGrahamTable();
-  document.getElementById('hcount').textContent = filtered.length + ' empresa' + (filtered.length!==1?'s':'');
 }
 
-/* ── Cards render ── */
+/* ── Cards ── */
 function renderPage(reset) {
   const area  = document.getElementById('grid-area');
   const slice = filtered.slice(page * PAGE, (page + 1) * PAGE);
@@ -476,11 +552,11 @@ function cardHTML(s) {
     </div>`;
 }
 
-/* ═══════════════════════════════════════════════
-   GRAHAM VIEW
-═══════════════════════════════════════════════ */
+/* ═══════════════════════════════════
+   GRAHAM
+═══════════════════════════════════ */
 async function startGraham() {
-  document.getElementById('graham-area').innerHTML = '';
+  document.getElementById('graham-msg').textContent = '';
   if (grahamLoaded) { renderGrahamTable(); return; }
   if (!grahamLoading) await loadGrahamData();
 }
@@ -488,88 +564,112 @@ async function startGraham() {
 async function loadGrahamData() {
   grahamLoading = true;
   const tickers = allStocks.map(s => s.stock);
-
-  // Which ones still need fetching
   const missing = tickers.filter(t => !(t in grahamData));
   const batches = [];
   for (let i = 0; i < missing.length; i += BATCH) batches.push(missing.slice(i, i + BATCH));
 
   const prog = document.getElementById('graham-progress');
-  prog.style.display = batches.length ? 'block' : 'none';
+  if (batches.length === 0) {
+    prog.style.display = 'none';
+  } else {
+    prog.style.display = 'block';
+    document.getElementById('graham-summary').style.display = 'none';
+    document.getElementById('graham-filters').style.display = 'none';
+    document.getElementById('gtable-wrap').style.display    = 'none';
+  }
 
   for (let i = 0; i < batches.length; i++) {
     const pct = Math.round((i / batches.length) * 100);
     document.getElementById('prog-label').textContent =
-      `Buscando dados fundamentalistas… (${i * BATCH + batches[i].length} / ${missing.length})`;
+      `Buscando dados… (${Math.min((i + 1) * BATCH, missing.length)} / ${missing.length} ações)`;
     document.getElementById('prog-pct').textContent = pct + '%';
-    document.getElementById('prog-bar').style.width  = pct + '%';
+    document.getElementById('prog-bar').style.width = pct + '%';
 
     await fetchFundBatch(batches[i]);
+
+    // Show partial results after each batch
+    if (currentView === 'graham') renderGrahamTable();
     if (i < batches.length - 1) await sleep(BATCH_DELAY);
   }
 
   document.getElementById('prog-bar').style.width = '100%';
   document.getElementById('prog-pct').textContent = '100%';
-  await sleep(400);
+  await sleep(350);
   prog.style.display = 'none';
 
   grahamLoading = false;
   grahamLoaded  = true;
-  renderGrahamTable();
+  if (currentView === 'graham') renderGrahamTable();
 }
 
-async function fetchFundBatch(tickers) {
+async function fetchFundBatch(tickers, attempt) {
+  attempt = attempt || 1;
   try {
-    const res  = await fetch(`${API}/quote/${tickers.join(',')}?fundamental=true`);
+    const url = apiUrl('/quote/' + tickers.join(','), 'fundamental=true');
+    const res  = await fetch(url);
+
+    if (res.status === 429) {
+      // Rate limited — wait and retry once
+      if (attempt < 3) {
+        await sleep(3000 * attempt);
+        return fetchFundBatch(tickers, attempt + 1);
+      }
+      return;
+    }
     if (!res.ok) return;
+
     const json = await res.json();
     for (const item of (json.results || [])) {
-      if (item.symbol) {
-        grahamData[item.symbol] = item;
-        cSet('fund_' + item.symbol, item);
+      const sym = item.symbol;
+      if (sym) {
+        grahamData[sym] = item;
+        cSet('fund_' + sym, item);
       }
     }
-  } catch {}
+  } catch { /* network error — silently skip batch */ }
 }
 
-/* ── Graham formula ── */
+/* ── Graham formula ──────────────────────────────────────────
+   Original Benjamin Graham formula (adjusted for Brazil):
+   V* = LPA × (8.5 + 2g) × (4.4 / Y)
+   - g = expected annual growth rate (%)
+   - Y = risk-free rate / Selic (%)
+   - 8.5 = P/E multiple for zero-growth company
+   - 4.4 = bond yield in Graham's era (adjustment factor)
+──────────────────────────────────────────────────────────── */
 function calcGraham(ticker) {
   const d = grahamData[ticker];
   if (!d) return null;
 
   const price = d.regularMarketPrice;
   const lpa   = d.earningsPerShare;
-  const pvp   = d.priceToBook;
   const pl    = d.priceEarnings;
   const dy    = d.dividendYield;
 
-  if (!price || price <= 0) return null;
+  if (price == null || price <= 0) return null;
 
-  let vi = null, ms = null, vpa = null;
-  if (lpa > 0 && pvp > 0) {
-    vpa = price / pvp;
-    vi  = Math.sqrt(22.5 * lpa * vpa);
-    ms  = (vi - price) / vi * 100;
+  const { g, y } = getSettings();
+
+  let vi = null, ms = null;
+  if (lpa != null && lpa > 0 && y > 0) {
+    vi = lpa * (8.5 + 2 * g) * (4.4 / y);
+    ms = (vi - price) / vi * 100;
   }
 
-  // 5 Graham criteria
-  const c1 = lpa != null && lpa > 0;
-  const c2 = pl  != null && pl > 0 && pl <= 15;
-  const c3 = pvp != null && pvp > 0 && pvp <= 1.5;
-  const c4 = pl  != null && pvp != null && pl > 0 && pvp > 0 && pl * pvp <= 22.5;
-  const c5 = ms  != null && ms >= 20;
-  const score = [c1,c2,c3,c4,c5].filter(Boolean).length;
+  // Graham criteria (with data available from API)
+  const c1 = lpa != null && lpa > 0;                  // LPA positivo
+  const c2 = pl  != null && pl  > 0 && pl  <= 15;     // P/L ≤ 15
+  const c3 = dy  != null && dy  > 0;                  // Paga dividendos
+  const c4 = vi  != null && price <= vi;               // Preço ≤ V. Intrínseco
+  const c5 = ms  != null && ms  >= 20;                 // Margem ≥ 20%
+  const score = [c1, c2, c3, c4, c5].filter(Boolean).length;
 
-  return { price, lpa, vpa, pvp, pl, dy, vi, ms, score, c1, c2, c3, c4, c5 };
+  return { price, lpa, pl, dy, vi, ms, score, c1, c2, c3, c4, c5, g, y };
 }
 
-/* ── Render Graham table ── */
+/* ── Table ── */
 function renderGrahamTable() {
-  document.getElementById('graham-area').innerHTML = '';
-
-  const rows = filtered.map(s => ({ ...s, g: calcGraham(s.stock) }));
-
-  // Apply MS filter
+  const rows  = filtered.map(s => ({ ...s, g: calcGraham(s.stock) }));
   const shown = rows.filter(r => {
     if (msFilter === 'under')  return r.g && r.g.ms != null && r.g.ms > 0;
     if (msFilter === 'strong') return r.g && r.g.ms != null && r.g.ms >= 20;
@@ -586,33 +686,40 @@ function renderGrahamTable() {
     return (av - bv) * gSort.dir;
   });
 
-  // Summary (over full filtered, not just shown)
-  const withData = rows.filter(r => r.g && r.g.ms != null);
+  // Summary
+  const withData = rows.filter(r => r.g && r.g.vi != null);
   const under    = withData.filter(r => r.g.ms > 0).length;
   const strong   = withData.filter(r => r.g.ms >= 20).length;
-  const avgMs    = withData.length ? withData.reduce((s,r) => s + r.g.ms, 0) / withData.length : null;
+  const total    = rows.filter(r => r.g != null).length;
+  const avgMs    = withData.length
+    ? withData.reduce((s, r) => s + r.g.ms, 0) / withData.length
+    : null;
 
-  document.getElementById('gs-total').textContent  = withData.length;
-  document.getElementById('gs-under').textContent  = under;
-  document.getElementById('gs-strong').textContent = strong;
+  document.getElementById('gs-total').textContent  = total || '…';
+  document.getElementById('gs-under').textContent  = under || (grahamLoading ? '…' : '0');
+  document.getElementById('gs-strong').textContent = strong || (grahamLoading ? '…' : '0');
   document.getElementById('gs-avg').textContent    =
-    avgMs != null ? (avgMs >= 0 ? '+' : '') + avgMs.toFixed(1).replace('.',',') + '%' : '—';
+    avgMs != null
+      ? (avgMs >= 0 ? '+' : '') + avgMs.toFixed(1).replace('.', ',') + '%'
+      : (grahamLoading ? '…' : '—');
 
   document.getElementById('graham-summary').style.display = 'flex';
   document.getElementById('graham-filters').style.display = 'flex';
 
-  if (!shown.length) {
+  if (!shown.length && !grahamLoading) {
     document.getElementById('gtable-wrap').style.display = 'none';
-    document.getElementById('graham-area').innerHTML = '<div class="state-box">Nenhuma empresa encontrada com os filtros atuais.</div>';
+    document.getElementById('graham-msg').innerHTML =
+      '<div class="state-box">Nenhuma empresa encontrada com os filtros atuais.</div>';
     return;
   }
 
   document.getElementById('gtable-wrap').style.display = '';
+  document.getElementById('graham-msg').innerHTML = '';
 
-  // Update sort header highlight
+  // Sort headers
   document.querySelectorAll('.gtable thead th').forEach(th => th.classList.remove('sorted'));
-  const headers = ['rank','ticker','name','price','vi','ms','lpa','vpa','pl','pvp','score'];
-  const idx = headers.indexOf(gSort.col);
+  const COLS = ['rank','ticker','name','price','vi','ms','lpa','pl','dy','score'];
+  const idx  = COLS.indexOf(gSort.col);
   if (idx >= 0) {
     const ths = document.querySelectorAll('.gtable thead th');
     if (ths[idx]) {
@@ -622,34 +729,43 @@ function renderGrahamTable() {
     }
   }
 
+  const noData = `<span class="na-text">—</span>`;
+
   document.getElementById('gtbody').innerHTML = shown.map((r, i) => {
     const g = r.g;
-    const noData = `<span class="na-text">—</span>`;
     if (!g) {
       return `<tr onclick="openModal('${esc(r.stock)}')">
-        <td class="rank-col">${i+1}</td>
+        <td class="rank-col">${i + 1}</td>
         <td class="ticker-col">${r.stock}</td>
-        <td class="name-col">${r.name||''}</td>
-        <td class="num">${r.close!=null?fmtR(r.close):noData}</td>
-        <td colspan="7" style="color:var(--muted);font-size:12px">Dados fundamentalistas não disponíveis</td>
+        <td class="name-col">${r.name || ''}</td>
+        <td>${r.close != null ? fmtR(r.close) : noData}</td>
+        <td colspan="6" class="na-text" style="font-size:12px">
+          ${grahamLoading ? '<span style="color:var(--accent)">carregando…</span>' : 'Sem dados fundamentalistas'}
+        </td>
       </tr>`;
     }
 
-    const msCls = g.ms == null ? 'ms-na' : g.ms >= 30 ? 'ms-strong' : g.ms >= 10 ? 'ms-good' : g.ms >= 0 ? 'ms-fair' : 'ms-over';
-    const msStr = g.ms != null ? (g.ms >= 0 ? '+' : '') + g.ms.toFixed(1).replace('.',',') + '%' : '—';
-    const dots  = [g.c1,g.c2,g.c3,g.c4,g.c5].map(v => `<div class="dot ${v?'on':'off'}"></div>`).join('');
+    const msCls = g.ms == null ? 'ms-na'
+      : g.ms >= 30 ? 'ms-strong'
+      : g.ms >= 10 ? 'ms-good'
+      : g.ms >=  0 ? 'ms-fair'
+      : 'ms-over';
+    const msStr = g.ms != null
+      ? (g.ms >= 0 ? '+' : '') + g.ms.toFixed(1).replace('.', ',') + '%'
+      : '—';
+    const dots = [g.c1, g.c2, g.c3, g.c4, g.c5]
+      .map(v => `<div class="dot ${v ? 'on' : 'off'}"></div>`).join('');
 
     return `<tr onclick="openModal('${esc(r.stock)}')">
-      <td class="rank-col">${i+1}</td>
+      <td class="rank-col">${i + 1}</td>
       <td class="ticker-col">${r.stock}</td>
-      <td class="name-col">${r.name||''}</td>
-      <td class="num">${fmtR(g.price)}</td>
-      <td class="num">${g.vi!=null ? fmtR(g.vi) : noData}</td>
+      <td class="name-col">${r.name || ''}</td>
+      <td>${fmtR(g.price)}</td>
+      <td>${g.vi != null ? fmtR(g.vi) : noData}</td>
       <td><span class="badge ${msCls}">${msStr}</span></td>
-      <td class="num">${g.lpa!=null ? fmtR(g.lpa) : noData}</td>
-      <td class="num">${g.vpa!=null ? fmtR(g.vpa) : noData}</td>
-      <td class="num">${g.pl!=null  ? g.pl.toFixed(2).replace('.',',') : noData}</td>
-      <td class="num">${g.pvp!=null ? g.pvp.toFixed(2).replace('.',',') : noData}</td>
+      <td>${g.lpa != null ? fmtR(g.lpa) : noData}</td>
+      <td>${g.pl  != null ? g.pl.toFixed(2).replace('.', ',') : noData}</td>
+      <td>${g.dy  != null ? g.dy.toFixed(2).replace('.', ',') + '%' : noData}</td>
       <td><div class="score-dots">${dots}</div></td>
     </tr>`;
   }).join('');
@@ -664,9 +780,8 @@ function gSortVal(r) {
     case 'vi':     return g?.vi    ?? null;
     case 'ms':     return g?.ms    ?? null;
     case 'lpa':    return g?.lpa   ?? null;
-    case 'vpa':    return g?.vpa   ?? null;
     case 'pl':     return g?.pl    ?? null;
-    case 'pvp':    return g?.pvp   ?? null;
+    case 'dy':     return g?.dy    ?? null;
     case 'score':  return g?.score ?? null;
     default:       return null;
   }
@@ -678,20 +793,14 @@ function sortGraham(col) {
   renderGrahamTable();
 }
 
-function hideGrahamPanels() {
-  document.getElementById('graham-progress').style.display = 'none';
-  document.getElementById('graham-summary').style.display  = 'none';
-  document.getElementById('graham-filters').style.display  = 'none';
-  document.getElementById('gtable-wrap').style.display     = 'none';
-}
-
-/* ═══════════════════════════════════════════════
+/* ═══════════════════════════════════
    MODAL
-═══════════════════════════════════════════════ */
+═══════════════════════════════════ */
 async function openModal(ticker) {
   const basic = allStocks.find(s => s.stock === ticker) || {};
   document.getElementById('modal-head').innerHTML = headHTML(ticker, basic);
-  document.getElementById('modal-body').innerHTML = '<div class="state-box"><div class="spinner"></div></div>';
+  document.getElementById('modal-body').innerHTML =
+    '<div class="state-box"><div class="spinner"></div></div>';
   document.getElementById('overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
   await fetchDetail(ticker, '1mo');
@@ -706,11 +815,11 @@ function headHTML(ticker, basic) {
   return `${logoEl}
     <div class="modal-title">
       <div class="ticker">${ticker}</div>
-      <div class="cname">${basic.name||''}</div>
+      <div class="cname">${basic.name || ''}</div>
     </div>
     <div class="modal-price">
-      <div class="price">${basic.close!=null?fmtR(basic.close):'—'}</div>
-      <div class="badge ${cls}">${chg>=0?'+':''}${chg.toFixed(2).replace('.',',')}%</div>
+      <div class="price">${basic.close != null ? fmtR(basic.close) : '—'}</div>
+      <div class="badge ${cls}">${chg >= 0 ? '+' : ''}${chg.toFixed(2).replace('.', ',')}%</div>
     </div>
     <button class="modal-close" onclick="closeModal()">✕</button>`;
 }
@@ -722,11 +831,23 @@ async function fetchDetail(ticker, range) {
 
   if (!data) {
     try {
-      const res  = await fetch(`${API}/quote/${ticker}?range=${range}&interval=1d&fundamental=true`);
+      const url  = apiUrl('/quote/' + ticker, 'range=' + range + '&interval=1d&fundamental=true');
+      const res  = await fetch(url);
+      if (res.status === 429) {
+        body.innerHTML = `<div class="state-box" style="color:var(--yellow)">
+          Limite de requisições atingido. Aguarde alguns segundos e tente novamente.<br><br>
+          <button class="btn" onclick="fetchDetail('${esc(ticker)}','${range}')">Tentar novamente</button>
+        </div>`;
+        return;
+      }
       if (!res.ok) throw new Error();
       const json = await res.json();
       data = (json.results || [])[0];
-      if (data) { cSet(key, data); grahamData[ticker] = data; cSet('fund_' + ticker, data); }
+      if (data) {
+        cSet(key, data);
+        grahamData[ticker] = data;
+        cSet('fund_' + ticker, data);
+      }
     } catch {
       body.innerHTML = `<div class="state-box" style="color:#ff8a9e">
         Erro ao carregar dados.<br><br>
@@ -736,15 +857,20 @@ async function fetchDetail(ticker, range) {
     }
   }
 
-  if (!data) { body.innerHTML = '<div class="state-box">Dados não disponíveis.</div>'; return; }
+  if (!data) {
+    body.innerHTML = '<div class="state-box">Dados não disponíveis.</div>';
+    return;
+  }
 
-  // Refresh header
   if (data.regularMarketPrice) {
     const pe = document.querySelector('.modal-price .price');
     if (pe) pe.textContent = fmtR(data.regularMarketPrice);
+    const c = data.regularMarketChangePercent ?? 0;
     const be = document.querySelector('.modal-price .badge');
-    const c  = data.regularMarketChangePercent ?? 0;
-    if (be) { be.textContent = (c>=0?'+':'') + c.toFixed(2).replace('.',',') + '%'; be.className = 'badge '+(c>0.001?'up':c<-0.001?'down':'flat'); }
+    if (be) {
+      be.textContent  = (c >= 0 ? '+' : '') + c.toFixed(2).replace('.', ',') + '%';
+      be.className = 'badge ' + (c > 0.001 ? 'up' : c < -0.001 ? 'down' : 'flat');
+    }
   }
 
   body.innerHTML = buildModalBody(data, ticker, range);
@@ -761,47 +887,63 @@ function buildModalBody(d, ticker, range) {
   const g = calcGraham(ticker);
   return `
     ${chartSection(d, range)}
-    ${grahamSection(g, d)}
+    ${grahamSection(g, ticker)}
     <p class="section-title">Indicadores de mercado</p>
     <div class="metrics">${metricsHTML(d)}</div>
     ${extraHTML(d)}`;
 }
 
-/* ── Graham section inside modal ── */
-function grahamSection(g, d) {
+/* ── Graham modal card ── */
+function grahamSection(g, ticker) {
   if (!g) {
-    return `<div class="graham-card" style="margin-bottom:16px">
-      <div class="section-title" style="margin-bottom:8px">Análise Benjamin Graham</div>
-      <div style="font-size:13px;color:var(--muted)">
-        Dados insuficientes para calcular o valor intrínseco.
-        São necessários LPA positivo e P/VP positivo.
+    return `<div class="graham-card">
+      <div class="sec-title">Análise Benjamin Graham</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:8px">
+        Dados insuficientes — LPA não disponível para esta ação.
       </div>
     </div>`;
   }
 
+  const { g: growthRate, y: selic } = getSettings();
   const viStr = g.vi != null ? fmtR(g.vi) : '—';
-  const msAbs = g.ms != null ? Math.abs(g.ms) : 0;
-  const msCls = g.ms == null ? 'ms-na' : g.ms >= 30 ? 'ms-strong' : g.ms >= 10 ? 'ms-good' : g.ms >= 0 ? 'ms-fair' : 'ms-over';
-  const msColor = g.ms == null ? 'var(--muted)' : g.ms >= 30 ? '#00ff96' : g.ms >= 10 ? 'var(--green)' : g.ms >= 0 ? 'var(--yellow)' : 'var(--red)';
-  const msStr = g.ms != null ? (g.ms >= 0 ? '+' : '') + g.ms.toFixed(1).replace('.',',') + '%' : '—';
-  const statusLabel = g.ms == null ? 'Sem dados' : g.ms >= 30 ? 'Forte oportunidade' : g.ms >= 10 ? 'Subvalorizada' : g.ms >= 0 ? 'Levemente sub.' : g.ms >= -20 ? 'Sobrevalorizada' : 'Muito sobrevalorizada';
+  const msColor = g.ms == null ? 'var(--muted)'
+    : g.ms >= 30 ? '#00ff96'
+    : g.ms >= 10 ? 'var(--green)'
+    : g.ms >=  0 ? 'var(--yellow)'
+    : 'var(--red)';
+  const msCls = g.ms == null ? 'ms-na'
+    : g.ms >= 30 ? 'ms-strong'
+    : g.ms >= 10 ? 'ms-good'
+    : g.ms >=  0 ? 'ms-fair'
+    : 'ms-over';
+  const msStr = g.ms != null
+    ? (g.ms >= 0 ? '+' : '') + g.ms.toFixed(1).replace('.', ',') + '%'
+    : '—';
+  const statusLabel = g.ms == null     ? 'Sem dados'
+    : g.ms >= 30  ? 'Forte oportunidade'
+    : g.ms >= 10  ? 'Subvalorizada'
+    : g.ms >=  0  ? 'Levemente subv.'
+    : g.ms >= -20 ? 'Sobrevalorizada'
+    : 'Muito sobrevalorizada';
 
-  // Bar: clamp ms to [-100, 100] for display
-  const barPct = g.ms != null ? Math.min(Math.max((g.ms + 100) / 200 * 100, 0), 100) : 50;
+  // Position on -100..+100 scale mapped to 0..100%
+  const barPct = g.ms != null
+    ? Math.min(Math.max((g.ms + 100) / 200 * 100, 0), 100)
+    : 50;
   const barCol = g.ms == null ? 'var(--muted)' : g.ms >= 0 ? 'var(--green)' : 'var(--red)';
 
-  // Score dots
-  const dots = [g.c1,g.c2,g.c3,g.c4,g.c5].map(v => `<div class="dot ${v?'on':'off'}" style="width:9px;height:9px"></div>`).join('');
+  const dots = [g.c1,g.c2,g.c3,g.c4,g.c5]
+    .map(v => `<div class="dot ${v?'on':'off'}" style="width:9px;height:9px"></div>`).join('');
 
   const crit = [
-    [g.c1, `LPA positivo`, g.lpa!=null ? fmtR(g.lpa) : '—'],
-    [g.c2, `P/L ≤ 15`,     g.pl!=null  ? g.pl.toFixed(2).replace('.',',') : '—'],
-    [g.c3, `P/VP ≤ 1,5`,   g.pvp!=null ? g.pvp.toFixed(2).replace('.',',') : '—'],
-    [g.c4, `P/L × P/VP ≤ 22,5`, g.pl&&g.pvp ? (g.pl*g.pvp).toFixed(2).replace('.',',') : '—'],
-    [g.c5, `Margem ≥ 20%`, msStr],
+    [g.c1, 'LPA positivo',           g.lpa != null ? fmtR(g.lpa) : '—'],
+    [g.c2, 'P/L ≤ 15',               g.pl  != null ? g.pl.toFixed(2).replace('.',',') : '—'],
+    [g.c3, 'Paga dividendos',         g.dy  != null ? g.dy.toFixed(2).replace('.',',')+'%' : '—'],
+    [g.c4, 'Preço ≤ V. Intrínseco',  g.vi  != null ? fmtR(g.vi) : '—'],
+    [g.c5, 'Margem de segurança ≥ 20%', msStr],
   ].map(([pass, label, val]) => `
     <div class="criterion">
-      <div class="crit-icon ${pass?'pass':'fail'}">${pass?'✓':'✗'}</div>
+      <div class="crit-icon ${pass ? 'pass' : 'fail'}">${pass ? '✓' : '✗'}</div>
       <div class="crit-text">
         <div>${label}</div>
         <div class="crit-val">${val}</div>
@@ -810,15 +952,15 @@ function grahamSection(g, d) {
 
   return `
     <div class="graham-card">
-      <div class="section-title" style="margin-bottom:12px">Análise Benjamin Graham</div>
+      <div class="sec-title">Análise Benjamin Graham</div>
       <div class="graham-card-head">
         <div>
-          <div class="sec-title">Valor Intrínseco</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px">Valor Intrínseco</div>
           <div class="vi-main">${viStr}</div>
-          <div class="vi-formula">V* = √(22,5 × LPA × VPA)</div>
+          <div class="vi-sub">V* = LPA × (8,5 + 2g) × 4,4/Y</div>
         </div>
         <div class="ms-display">
-          <div class="ms-label">Margem de Segurança</div>
+          <div class="ms-lbl">Margem de Segurança</div>
           <div class="ms-pct" style="color:${msColor}">${msStr}</div>
           <div class="badge ${msCls}" style="margin-top:4px">${statusLabel}</div>
         </div>
@@ -829,25 +971,25 @@ function grahamSection(g, d) {
           <div class="ms-bar-fg" style="width:${barPct}%;background:${barCol}"></div>
         </div>
         <div class="ms-bar-labels">
-          <span>Muito sobrevalorizada</span>
-          <span>Justa</span>
-          <span>Forte desconto</span>
+          <span>Sobrevalorizada</span><span>Justa</span><span>Forte desconto</span>
         </div>
       </div>
 
-      <div style="margin-bottom:10px;display:flex;align-items:center;gap:10px">
-        <span style="font-size:12px;color:var(--muted)">Score Graham</span>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <span style="font-size:12px;color:var(--muted)">Score</span>
         <div class="score-dots">${dots}</div>
-        <span style="font-size:12px;color:var(--accent)">${g.score}/5</span>
+        <span style="font-size:12px;color:var(--accent);font-weight:600">${g.score}/5</span>
       </div>
 
       <div class="criteria-grid">${crit}</div>
 
       ${g.vi != null ? `
-      <div style="margin-top:12px;padding:10px 12px;background:var(--bg);border-radius:8px;font-size:11px;color:var(--muted);line-height:1.7">
-        LPA = ${fmtR(g.lpa)} &nbsp;|&nbsp;
-        VPA = ${fmtR(g.vpa)} &nbsp;|&nbsp;
-        V* = √(22,5 × ${g.lpa.toFixed(2)} × ${g.vpa.toFixed(2)}) = <strong style="color:var(--text)">${fmtR(g.vi)}</strong>
+      <div class="calc-breakdown">
+        LPA = <strong style="color:var(--text)">${fmtR(g.lpa)}</strong> &nbsp;
+        g = <strong style="color:var(--text)">${growthRate}%</strong> &nbsp;
+        Y = <strong style="color:var(--text)">${selic}%</strong><br>
+        V* = ${g.lpa.toFixed(4)} × (8,5 + ${2*growthRate}) × (4,4 ÷ ${selic})
+           = <strong style="color:var(--accent)">${fmtR(g.vi)}</strong>
       </div>` : ''}
     </div>`;
 }
@@ -862,7 +1004,7 @@ function chartSection(d, range) {
   const prices = (d.historicalDataPrice||[]).map(p=>p.close).filter(v=>v!=null);
   let body = '';
   if (prices.length >= 2) {
-    const W=620,H=100, mn=Math.min(...prices), mx=Math.max(...prices);
+    const W=620, H=100, mn=Math.min(...prices), mx=Math.max(...prices);
     const pad=(mx-mn)*0.08||1, lo=mn-pad, hi=mx+pad;
     const xs=prices.map((_,i)=>(i/(prices.length-1))*W);
     const ys=prices.map(p=>H-((p-lo)/(hi-lo))*H);
@@ -900,14 +1042,15 @@ function metricsHTML(d) {
     ['Volume',         d.regularMarketVolume        != null ? fmtLarge(d.regularMarketVolume)    : '—'],
     ['Market Cap',     d.marketCap                  != null ? fmtLarge(d.marketCap)              : '—'],
     ['P/L',            d.priceEarnings              != null ? d.priceEarnings.toFixed(2).replace('.',',')  : '—'],
-    ['P/VP',           d.priceToBook                != null ? d.priceToBook.toFixed(2).replace('.',',')    : '—'],
     ['LPA',            d.earningsPerShare           != null ? fmtR(d.earningsPerShare)           : '—'],
     ['Div. Yield',     d.dividendYield              != null ? d.dividendYield.toFixed(2).replace('.',',')+'%' : '—'],
     ['Máx. 52 sem.',   d.fiftyTwoWeekHigh           != null ? fmtR(d.fiftyTwoWeekHigh)           : '—'],
     ['Mín. 52 sem.',   d.fiftyTwoWeekLow            != null ? fmtR(d.fiftyTwoWeekLow)            : '—'],
     ['Média 200d',     d.twoHundredDayAverage       != null ? fmtR(d.twoHundredDayAverage)       : '—'],
     ['Média 50d',      d.fiftyDayAverage            != null ? fmtR(d.fiftyDayAverage)            : '—'],
-  ].map(([lbl,val]) => `<div class="metric"><div class="lbl">${lbl}</div><div class="val">${val}</div></div>`).join('');
+  ].map(([lbl,val]) =>
+    `<div class="metric"><div class="lbl">${lbl}</div><div class="val">${val}</div></div>`
+  ).join('');
 }
 
 /* ── Extra info ── */
@@ -927,11 +1070,16 @@ function extraHTML(d) {
 }
 
 /* ── Modal close ── */
-function handleOverlayClick(e) { if (e.target===document.getElementById('overlay')) closeModal(); }
-function closeModal() { document.getElementById('overlay').classList.remove('open'); document.body.style.overflow=''; }
-document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('overlay')) closeModal();
+}
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-/* ── Utils ── */
+/* ── Helpers ── */
 function fmtR(v) { return 'R$ ' + v.toFixed(2).replace('.', ','); }
 function fmtLarge(n) {
   if (n >= 1e12) return 'R$ ' + (n/1e12).toFixed(2).replace('.',',') + ' T';
@@ -940,8 +1088,8 @@ function fmtLarge(n) {
   if (n >= 1e3)  return 'R$ ' + (n/1e3 ).toFixed(2).replace('.',',') + ' K';
   return 'R$ ' + n.toFixed(0);
 }
-function esc(s)  { return String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;'); }
-function esc2(s) { return String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function esc(s)  { return String(s).replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+function esc2(s) { return String(s).replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 /* ── Boot ── */
