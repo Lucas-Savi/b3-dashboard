@@ -332,8 +332,8 @@ const API   = 'https://brapi.dev/api';
 const TTL   = 30 * 60 * 1000;
 const GTTL  = 8  * 60 * 60 * 1000;
 const PAGE  = 40;
-const BATCH = 15;
-const DELAY = 1000; // ms between batches
+const BATCH = 20;
+const DELAY = 600;  // ms between batches (fundamental=true is lighter than modules)
 
 /* ── State ── */
 let stocks = [], filtered = [], page = 0;
