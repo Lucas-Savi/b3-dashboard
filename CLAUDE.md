@@ -116,9 +116,10 @@ Both: Margin of Safety = (V* − Price) / V* × 100
 ### Data loading strategy
 
 - Company list cached 30 min per type (`b3_list_{type}`)
-- Fundamental data cached 8 h per ticker (`b3_fund_{ticker}`)
-- Graham bulk fetch: batches of 15 tickers with 1 s delay to respect rate limits
-- HTTP 429 (rate limited): automatic retry up to 2× with exponential backoff (3.5 s, 7 s)
+- Fundamental data cached 8 h per ticker (`b3_fund_{ticker}`) — merged on each fetch so modal data enriches bulk data
+- Graham bulk fetch: batches of **20** tickers with **600 ms** delay using `fundamental=true`
+- Modal fetch: single ticker with `modules=` — merged into `gData` so Graham table upgrades to revised formula after open
+- HTTP 429: automatic retry up to 2× with exponential backoff (4 s, 8 s)
 - Partial table results rendered after each successful batch
 
 ### localStorage keys (b3-empresas.html)
