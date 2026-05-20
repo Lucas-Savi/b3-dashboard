@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File \"c:\\Users\\lucas\\OneDrive\\Área de Trabalho\\Projeto Claude Code\\sync-github.ps1\""
+          }
+        ]
+      }
+    ]
+  }
+}

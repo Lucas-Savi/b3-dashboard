@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## GitHub
+
+Repository: https://github.com/Lucas-Savi/b3-dashboard
+
+Every time Claude edits a file, a PostToolUse hook runs `sync-github.ps1` which automatically commits and pushes changes to GitHub. No manual git commands are needed.
+
 ## Project overview
 
 Single-file static dashboard (`index.html`) for tracking B3 stock quotes for TAEE11 (Taesa), SANB11 (Santander Brasil), and ENGI11 (Energisa). No build step, no dependencies, no server — open the file directly in a browser.
