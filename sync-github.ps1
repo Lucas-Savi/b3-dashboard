@@ -1,4 +1,4 @@
-$project = "c:\Users\lucas\OneDrive\Área de Trabalho\Projeto Claude Code"
+$project = $PSScriptRoot
 $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH", "User")
 
 git -C $project add -A

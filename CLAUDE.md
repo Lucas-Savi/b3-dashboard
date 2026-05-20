@@ -42,3 +42,7 @@ Add an entry to the `DEFAULT` array (fields: `symbol`, `name`, `color`, `price`,
 | `b3_stocks_date` | Human-readable string of last save timestamp |
 
 To reset to defaults, clear these two keys in DevTools → Application → Local Storage.
+
+## Git workflow
+
+Changes are committed and pushed automatically — no manual `git push` needed. The commit message includes the date/time of the change.
