@@ -67,8 +67,10 @@ All endpoints work without a token. A free token from brapi.dev removes rate lim
 | Endpoint | Purpose |
 |---|---|
 | `GET /quote/list?limit=1000&type={stock\|fund\|bdr}` | Lists all B3 companies (`stock`, `name`, `close`, `change`, `market_cap`, `sector`, `logo`) |
-| `GET /quote/{tickers}?modules=defaultKeyStatistics,summaryProfile,financialData` | Fundamental data for Graham (tickers = comma-separated batch of up to 15) |
-| `GET /quote/{ticker}?range={range}&interval=1d&modules=defaultKeyStatistics,summaryProfile,financialData` | Full detail with price history + fundamentals for the modal |
+| `GET /quote/{tickers}?fundamental=true` | **Bulk Graham fetch** — batches of 20, returns `earningsPerShare` + `priceEarnings`. Uses the lighter endpoint to avoid rate limiting |
+| `GET /quote/{ticker}?range={range}&interval=1d&modules=defaultKeyStatistics,summaryProfile,financialData` | **Modal only** — full detail with price history, VPA (`bookValue`), P/VP, ROE, sector, description |
+
+> **Why two different endpoints?** The `modules=` endpoint is heavily rate-limited on the free tier. Requesting it for 500+ stocks in batches triggers HTTP 429 after the first few calls. The `fundamental=true` endpoint is much more permissive and reliably returns LPA and P/L for every stock. Module data is fetched on-demand per stock when the user opens a modal.
 
 #### Fields returned per module
 
