@@ -11,6 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import DividendYieldPanel from "../components/DividendYieldPanel";
 import GrahamBadge from "../components/GrahamBadge";
 import { useGraham, useHistory } from "../hooks/useGraham";
 import { formatBRL, formatNumber, formatPercent } from "../lib/formatters";
@@ -218,6 +219,9 @@ export default function Stock() {
           />
         </div>
       </div>
+
+      {/* ── Dividend Yield ──────────────────────────────── */}
+      <DividendYieldPanel ticker={ticker} />
     </div>
   );
 }

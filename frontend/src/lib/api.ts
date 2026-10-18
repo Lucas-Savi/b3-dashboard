@@ -1,4 +1,5 @@
 import type {
+  DividendsResponse,
   FundamentalsResponse,
   GrahamResponse,
   HistoryPoint,
@@ -25,6 +26,9 @@ export const api = {
 
   getHistory: (ticker: string, period = "1y") =>
     get<HistoryPoint[]>(`/fundamentals/${ticker}/history?period=${period}`),
+
+  getDividends: (ticker: string) =>
+    get<DividendsResponse>(`/fundamentals/${ticker}/dividends`),
 
   getGraham: (ticker: string) =>
     get<GrahamResponse>(`/graham/${ticker}`),

@@ -3,6 +3,8 @@ from functools import partial
 
 import yfinance as yf
 
+from app.services.dividends import calcular_dividend_yield
+
 
 def _fetch_fundamentals(ticker: str) -> dict:
     yf_ticker = yf.Ticker(f"{ticker}.SA")
@@ -59,3 +61,22 @@ def _fetch_history(ticker: str, period: str) -> list[dict]:
 async def get_history(ticker: str, period: str = "1y") -> list[dict]:
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(None, partial(_fetch_history, ticker, period))
+
+
+def _fetch_dividends(ticker: str) -> dict:
+    yf_ticker = yf.Ticker(f"{ticker}.SA")
+    # auto_adjust=False: preço de fechamento real (só ajustado por desdobramentos),
+    # na mesma base dos proventos retornados por .dividends
+    hist = yf_ticker.history(period="max", interval="1mo", auto_adjust=False)
+    if hist.empty:
+        return calcular_dividend_yield(yf_ticker.dividends, {}, None) | {"price": None}
+    closes = hist["Close"].dropna()
+    fechamentos_anuais = {int(ano): float(v) for ano, v in closes.groupby(closes.index.year).last().items()}
+    preco_atual = float(closes.iloc[-1])
+    resultado = calcular_dividend_yield(yf_ticker.dividends, fechamentos_anuais, preco_atual)
+    return resultado | {"price": round(preco_atual, 2)}
+
+
+async def get_dividends(ticker: str) -> dict:
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(None, partial(_fetch_dividends, ticker))

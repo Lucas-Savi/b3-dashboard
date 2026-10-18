@@ -39,6 +39,22 @@ export interface HistoryPoint {
   volume: number;
 }
 
+export interface DividendYear {
+  ano: number;
+  dy: number;
+}
+
+export interface DividendsResponse {
+  ticker: string;
+  price: number | null;
+  dy_12m: number | null;
+  dy_5a: number | null;
+  dy_10a: number | null;
+  dy_medio: number | null;
+  anos_historico: number;
+  historico: DividendYear[];
+}
+
 export interface ScreenerEntry {
   ticker: string;
   company_name: string | null;
@@ -53,6 +69,10 @@ export interface ScreenerEntry {
   margem_seguranca: number | null;
   liquidez_corrente: number | null;
   divida_patrimonio: number | null;
+  dy_12m: number | null;
+  dy_5a: number | null;
+  dy_10a: number | null;
+  dy_medio: number | null;
   aprovado_graham: boolean;
   updated_at: string | null;
 }
