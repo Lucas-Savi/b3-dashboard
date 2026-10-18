@@ -6,9 +6,10 @@ import {
   Filter,
   Loader2,
   RefreshCw,
+  Sparkles,
   XCircle,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useRefreshScreener, useScreener, useScreenerStatus } from "../hooks/useScreener";
 import { formatBRL, formatNumber, formatPercent } from "../lib/formatters";
@@ -17,14 +18,30 @@ import type { ScreenerEntry, ScreenerFilters } from "../types";
 type SortKey = keyof ScreenerEntry;
 type SortDir = "asc" | "desc";
 
-const DEFAULT_FILTERS: ScreenerFilters = {
+// Ao abrir o Screener, todas as ações aparecem, sem filtro
+const NO_FILTERS: ScreenerFilters = {
+  pl_max: null,
+  pvpa_max: null,
+  pl_x_pvpa_max: null,
+  liquidez_min: null,
+  divida_max: null,
+  margem_min: null,
+  apenas_aprovados: false,
+};
+
+// Critérios clássicos de Benjamin Graham, preenchidos pelo botão "Filtros Graham"
+const GRAHAM_FILTERS: ScreenerFilters = {
   pl_max: 15,
   pvpa_max: 1.5,
   pl_x_pvpa_max: 22.5,
   liquidez_min: 2.0,
   divida_max: 1.0,
+  margem_min: 0,
   apenas_aprovados: false,
 };
+
+// Dados do screener mais antigos que isso são recalculados ao abrir a página (cache de 24h)
+const STALE_MS = 24 * 60 * 60 * 1000;
 
 function StatusIcon({ ok }: { ok: boolean | null }) {
   if (ok === null) return <span className="text-gray-600">—</span>;
@@ -42,8 +59,8 @@ function FilterInput({
   description,
 }: {
   label: string;
-  value: number;
-  onChange: (v: number) => void;
+  value: number | null;
+  onChange: (v: number | null) => void;
   description: string;
 }) {
   return (
@@ -52,8 +69,12 @@ function FilterInput({
       <input
         type="number"
         step="0.1"
-        value={value}
-        onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
+        value={value ?? ""}
+        placeholder="Sem filtro"
+        onChange={(e) => {
+          const v = parseFloat(e.target.value);
+          onChange(Number.isNaN(v) ? null : v);
+        }}
         className="w-full bg-gray-800 border border-gray-700 rounded px-3 py-1.5 text-sm text-white focus:outline-none focus:border-green-500"
       />
       <p className="text-xs text-gray-600 mt-0.5">{description}</p>
@@ -96,15 +117,30 @@ function exportCSV(data: ScreenerEntry[]) {
 }
 
 export default function Screener() {
-  const [filters, setFilters] = useState<ScreenerFilters>(DEFAULT_FILTERS);
+  const [filters, setFilters] = useState<ScreenerFilters>(NO_FILTERS);
   const [sort, setSort] = useState<{ key: SortKey; dir: SortDir }>({
     key: "margem_seguranca",
     dir: "desc",
   });
 
   const { data: status } = useScreenerStatus();
-  const { data: entries = [], isLoading } = useScreener(filters);
+  const { data: entries = [], isLoading } = useScreener(filters, status?.running ?? false);
   const refresh = useRefreshScreener();
+
+  // Ao abrir o Screener, computa todas as ações se o cache estiver vazio ou com mais de 24h
+  const autoStarted = useRef(false);
+  useEffect(() => {
+    if (!status || autoStarted.current || status.running) return;
+    const last = status.last_updated ? new Date(status.last_updated + "Z").getTime() : 0;
+    if (status.cached_count === 0 || Date.now() - last > STALE_MS) {
+      autoStarted.current = true;
+      refresh.mutate();
+    }
+  }, [status, refresh]);
+
+  const hasFilters =
+    filters.apenas_aprovados ||
+    Object.entries(filters).some(([k, v]) => k !== "apenas_aprovados" && v !== null);
 
   const sorted = useMemo(() => {
     return [...entries].sort((a, b) => {
@@ -132,8 +168,8 @@ export default function Screener() {
   }
 
   const isRefreshing = status?.running || refresh.isPending;
-  const lastUpdated = status?.finished_at
-    ? new Date(status.finished_at).toLocaleString("pt-BR")
+  const lastUpdated = status?.last_updated
+    ? new Date(status.last_updated + "Z").toLocaleString("pt-BR")
     : null;
 
   const thClass = "px-3 py-2 text-left text-xs font-medium text-gray-400 uppercase tracking-wide cursor-pointer hover:text-white select-none whitespace-nowrap";
@@ -181,6 +217,14 @@ export default function Screener() {
         <aside className="w-64 shrink-0 bg-gray-900 border border-gray-800 rounded-xl p-5 space-y-4">
           <h2 className="text-sm font-semibold text-white">Filtros</h2>
 
+          <button
+            onClick={() => setFilters(GRAHAM_FILTERS)}
+            className="w-full flex items-center justify-center gap-2 bg-green-700 hover:bg-green-600 text-white text-sm px-3 py-2 rounded-lg transition-colors font-medium"
+          >
+            <Sparkles className="w-4 h-4" />
+            Filtros Graham
+          </button>
+
           <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
@@ -223,12 +267,19 @@ export default function Screener() {
             onChange={(v) => setFilters((f) => ({ ...f, divida_max: v }))}
             description="Graham: ≤ 1,0"
           />
+          <FilterInput
+            label="Margem de Segurança mínima (%)"
+            value={filters.margem_min}
+            onChange={(v) => setFilters((f) => ({ ...f, margem_min: v }))}
+            description="Graham: ≥ 0% (preço abaixo do Nº de Graham)"
+          />
 
           <button
-            onClick={() => setFilters(DEFAULT_FILTERS)}
-            className="w-full text-xs text-gray-500 hover:text-gray-300 transition-colors py-1"
+            onClick={() => setFilters(NO_FILTERS)}
+            disabled={!hasFilters}
+            className="w-full text-xs text-gray-500 hover:text-gray-300 disabled:opacity-40 disabled:hover:text-gray-500 transition-colors py-1"
           >
-            Redefinir filtros
+            Limpar filtros
           </button>
         </aside>
 
@@ -255,7 +306,7 @@ export default function Screener() {
               <p className="text-gray-500 mb-3">Nenhum dado em cache.</p>
               <p className="text-sm text-gray-600">
                 Clique em <strong className="text-gray-400">Atualizar Dados</strong> para buscar
-                os fundamentos das ações do Ibovespa (~60 ações, pode levar 1-2 min).
+                os fundamentos de todas as ações da B3 (algumas centenas, pode levar alguns minutos).
               </p>
             </div>
           )}
@@ -267,7 +318,7 @@ export default function Screener() {
                 Buscando dados de {status.processed}/{status.total} ações...
               </p>
               <p className="text-sm text-gray-600 mt-1">
-                Os resultados aparecerão aqui após a conclusão.
+                As ações aparecem aqui conforme forem computadas.
               </p>
             </div>
           )}

@@ -10,11 +10,13 @@ export function useScreenerStatus() {
   });
 }
 
-export function useScreener(filters: Partial<ScreenerFilters>) {
+// Enquanto a atualização roda, a tabela é recarregada para mostrar as ações já computadas
+export function useScreener(filters: Partial<ScreenerFilters>, running = false) {
   return useQuery({
     queryKey: ["screener", filters],
     queryFn: () => api.getScreener(filters),
     staleTime: 0,
+    refetchInterval: running ? 5000 : false,
   });
 }
 

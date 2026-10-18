@@ -1,4 +1,5 @@
 from fastapi import APIRouter, BackgroundTasks, Depends
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -13,6 +14,8 @@ router = APIRouter(prefix="/screener", tags=["Screener Graham"])
 def get_status(db: Session = Depends(get_db)):
     status = screener_svc.get_status()
     status["cached_count"] = db.query(ScreenerEntry).count()
+    last = db.query(func.max(ScreenerEntry.updated_at)).scalar()
+    status["last_updated"] = last.isoformat() if last else None
     return status
 
 
@@ -26,11 +29,12 @@ async def trigger_refresh(background_tasks: BackgroundTasks, db: Session = Depen
 
 @router.get("/", response_model=list[ScreenerEntryResponse])
 def get_screener(
-    pl_max: float = 15.0,
-    pvpa_max: float = 1.5,
-    pl_x_pvpa_max: float = 22.5,
-    liquidez_min: float = 2.0,
-    divida_max: float = 1.0,
+    pl_max: float | None = None,
+    pvpa_max: float | None = None,
+    pl_x_pvpa_max: float | None = None,
+    liquidez_min: float | None = None,
+    divida_max: float | None = None,
+    margem_min: float | None = None,
     apenas_aprovados: bool = False,
     db: Session = Depends(get_db),
 ):
@@ -41,6 +45,7 @@ def get_screener(
         pl_x_pvpa_max=pl_x_pvpa_max,
         liquidez_min=liquidez_min,
         divida_max=divida_max,
+        margem_min=margem_min,
         apenas_aprovados=apenas_aprovados,
     )
     return [
