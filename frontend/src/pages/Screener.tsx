@@ -64,7 +64,8 @@ function FilterInput({
 function exportCSV(data: ScreenerEntry[]) {
   const headers = [
     "Ticker", "Empresa", "Setor", "Preço", "Nº Graham", "Margem %",
-    "P/L", "P/VPA", "P/L×P/VPA", "Liquidez", "Dív/PL", "Aprovado Graham",
+    "P/L", "P/VPA", "P/L×P/VPA", "Liquidez", "Dív/PL",
+    "DY 12M %", "DY 5A %", "DY 10A %", "DY Médio %", "Aprovado Graham",
   ];
   const rows = data.map((e) => [
     e.ticker,
@@ -78,6 +79,10 @@ function exportCSV(data: ScreenerEntry[]) {
     e.pl_x_pvpa ?? "",
     e.liquidez_corrente ?? "",
     e.divida_patrimonio ?? "",
+    e.dy_12m ?? "",
+    e.dy_5a ?? "",
+    e.dy_10a ?? "",
+    e.dy_medio ?? "",
     e.aprovado_graham ? "Sim" : "Não",
   ]);
   const csv = [headers, ...rows].map((r) => r.join(";")).join("\n");
@@ -306,6 +311,18 @@ export default function Screener() {
                       <th className={thClass} onClick={() => toggleSort("divida_patrimonio")}>
                         Dív/PL <SortIcon col="divida_patrimonio" />
                       </th>
+                      <th className={thClass} onClick={() => toggleSort("dy_12m")}>
+                        DY 12M <SortIcon col="dy_12m" />
+                      </th>
+                      <th className={thClass} onClick={() => toggleSort("dy_5a")}>
+                        DY 5A <SortIcon col="dy_5a" />
+                      </th>
+                      <th className={thClass} onClick={() => toggleSort("dy_10a")}>
+                        DY 10A <SortIcon col="dy_10a" />
+                      </th>
+                      <th className={thClass} onClick={() => toggleSort("dy_medio")}>
+                        DY Médio <SortIcon col="dy_medio" />
+                      </th>
                       <th className={thClass}>Graham</th>
                     </tr>
                   </thead>
@@ -354,6 +371,10 @@ export default function Screener() {
                           <StatusIcon ok={e.divida_patrimonio !== null ? e.divida_patrimonio <= 1 : null} />
                           <span className="ml-1">{formatNumber(e.divida_patrimonio)}</span>
                         </td>
+                        <td className={tdClass}>{formatPercent(e.dy_12m)}</td>
+                        <td className={tdClass}>{formatPercent(e.dy_5a)}</td>
+                        <td className={tdClass}>{formatPercent(e.dy_10a)}</td>
+                        <td className={tdClass}>{formatPercent(e.dy_medio)}</td>
                         <td className={tdClass}>
                           {e.aprovado_graham ? (
                             <span className="bg-green-900 text-green-300 text-xs px-2 py-0.5 rounded-full font-medium">

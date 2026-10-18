@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from app.schemas.stock import FundamentalsResponse
+from app.schemas.stock import DividendsResponse, FundamentalsResponse
 from app.services import yfinance_service
 
 router = APIRouter(prefix="/fundamentals", tags=["Fundamentos"])
@@ -26,3 +26,13 @@ async def get_history(ticker: str, period: str = "1y"):
         return await yfinance_service.get_history(ticker, period)
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Erro ao buscar histórico: {e}")
+
+
+@router.get("/{ticker}/dividends", response_model=DividendsResponse)
+async def get_dividends(ticker: str):
+    ticker = ticker.upper()
+    try:
+        data = await yfinance_service.get_dividends(ticker)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Erro ao buscar dividendos: {e}")
+    return {"ticker": ticker, **data}

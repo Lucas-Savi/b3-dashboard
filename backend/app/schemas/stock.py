@@ -36,6 +36,22 @@ class GrahamResponse(BaseModel):
     aprovado_graham: bool = Field(False, description="True se atende todos os critérios de Graham")
 
 
+class DividendYearResponse(BaseModel):
+    ano: int
+    dy: float
+
+
+class DividendsResponse(BaseModel):
+    ticker: str
+    price: float | None = None
+    dy_12m: float | None = Field(None, description="Proventos dos últimos 12 meses / preço atual × 100")
+    dy_5a: float | None = Field(None, description="Média do DY anual dos últimos 5 anos completos")
+    dy_10a: float | None = Field(None, description="Média do DY anual dos últimos 10 anos completos")
+    dy_medio: float | None = Field(None, description="Média do DY anual de todo o histórico disponível")
+    anos_historico: int = 0
+    historico: list[DividendYearResponse] = []
+
+
 class ScreenerFilters(BaseModel):
     pl_max: float = 15.0
     pvpa_max: float = 1.5
@@ -59,6 +75,10 @@ class ScreenerEntryResponse(BaseModel):
     margem_seguranca: float | None
     liquidez_corrente: float | None
     divida_patrimonio: float | None
+    dy_12m: float | None = None
+    dy_5a: float | None = None
+    dy_10a: float | None = None
+    dy_medio: float | None = None
     aprovado_graham: bool
     updated_at: str | None
 

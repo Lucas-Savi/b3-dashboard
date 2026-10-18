@@ -26,6 +26,15 @@ export function useHistory(ticker: string, period = "1y") {
   });
 }
 
+export function useDividends(ticker: string) {
+  return useQuery({
+    queryKey: ["dividends", ticker],
+    queryFn: () => api.getDividends(ticker),
+    enabled: !!ticker,
+    staleTime: 1000 * 60 * 60 * 24,
+  });
+}
+
 export function useTickers() {
   return useQuery({
     queryKey: ["tickers"],

@@ -56,14 +56,16 @@ async def refresh_all(db: Session) -> None:
     async def fetch_and_save(ticker: str) -> None:
         async with sem:
             try:
-                quote, fundamentals = await asyncio.gather(
+                quote, fundamentals, dividends = await asyncio.gather(
                     brapi.get_quote(ticker),
                     yfinance_service.get_fundamentals(ticker),
+                    yfinance_service.get_dividends(ticker),
                     return_exceptions=True,
                 )
 
                 q = quote if not isinstance(quote, Exception) else {}
                 f = fundamentals if not isinstance(fundamentals, Exception) else {}
+                d = dividends if not isinstance(dividends, Exception) else {}
 
                 # brapi tem prioridade; yfinance como fallback de preço
                 price = (q or {}).get("price") or (f or {}).get("price")
@@ -96,6 +98,10 @@ async def refresh_all(db: Session) -> None:
                 entry.margem_seguranca = resultado["margem_seguranca"]
                 entry.liquidez_corrente = liquidez
                 entry.divida_patrimonio = divida
+                entry.dy_12m = d.get("dy_12m")
+                entry.dy_5a = d.get("dy_5a")
+                entry.dy_10a = d.get("dy_10a")
+                entry.dy_medio = d.get("dy_medio")
                 entry.aprovado_graham = resultado["aprovado_graham"]
                 entry.updated_at = datetime.utcnow()
 
