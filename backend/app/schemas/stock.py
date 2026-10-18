@@ -93,3 +93,4 @@ class ScreenerStatusResponse(BaseModel):
     total: int
     errors: int
     cached_count: int
+    last_updated: str | None = None

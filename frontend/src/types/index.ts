@@ -85,13 +85,16 @@ export interface ScreenerStatus {
   total: number;
   errors: number;
   cached_count: number;
+  last_updated: string | null;
 }
 
+// null = filtro desligado
 export interface ScreenerFilters {
-  pl_max: number;
-  pvpa_max: number;
-  pl_x_pvpa_max: number;
-  liquidez_min: number;
-  divida_max: number;
+  pl_max: number | null;
+  pvpa_max: number | null;
+  pl_x_pvpa_max: number | null;
+  liquidez_min: number | null;
+  divida_max: number | null;
+  margem_min: number | null;
   apenas_aprovados: boolean;
 }

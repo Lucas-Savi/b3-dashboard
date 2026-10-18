@@ -38,12 +38,9 @@ export const api = {
 
   getScreener: (filters: Partial<ScreenerFilters> = {}) => {
     const params = new URLSearchParams();
-    if (filters.pl_max !== undefined) params.set("pl_max", String(filters.pl_max));
-    if (filters.pvpa_max !== undefined) params.set("pvpa_max", String(filters.pvpa_max));
-    if (filters.pl_x_pvpa_max !== undefined) params.set("pl_x_pvpa_max", String(filters.pl_x_pvpa_max));
-    if (filters.liquidez_min !== undefined) params.set("liquidez_min", String(filters.liquidez_min));
-    if (filters.divida_max !== undefined) params.set("divida_max", String(filters.divida_max));
-    if (filters.apenas_aprovados !== undefined) params.set("apenas_aprovados", String(filters.apenas_aprovados));
+    for (const [key, value] of Object.entries(filters)) {
+      if (value !== null && value !== undefined) params.set(key, String(value));
+    }
     return get<ScreenerEntry[]>(`/screener/?${params.toString()}`);
   },
 
